@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Arbitron</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f5f0eb;--bg2:#ede6dd;--bg3:#e4dbd0;
+  --card:#ffffff;--border:#d4c9bc;--border2:#c4b5a5;
+  --text:#2c1f14;--dim:#6b5344;--faint:#a8917e;
+  --accent:#8b1a2e;--accentlt:#c4314d;--accentbg:#8b1a2e12;
+  --gold:#9a6f20;--goldbg:#fdf3dc;
+  --green:#2d6e3e;--greenbg:#e0f0e6;--greenbdr:#a8d4b4;
+  --red:#b03030;--redbg:#fde8e8;
+  --blue:#1e5fa8;--bluebg:#e0ecf8;
+  --shadow:0 1px 4px rgba(0,0,0,0.08);
+  --shadow2:0 2px 12px rgba(0,0,0,0.1);
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans','Segoe UI',sans-serif;
+  font-size:13px;min-height:100vh;padding-bottom:72px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* TOPBAR */
+#topbar{background:var(--card);border-bottom:1px solid var(--border);
+  padding:0 16px;display:flex;align-items:center;justify-content:space-between;
+  height:52px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--accent)}
+
+/* STAT STRIP */
+#stats{background:var(--card);border-bottom:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(3,1fr)}
+.stat{padding:10px 14px;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-l{color:var(--faint);font-size:9px;font-weight:600;letter-spacing:.07em;
+  text-transform:uppercase;margin-bottom:3px}
+.stat-v{font-size:18px;font-weight:600}
+
+/* MAIN */
+#main{padding:12px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  box-shadow:var(--shadow);margin-bottom:10px}
+.card-pad{padding:14px 16px}
+
+/* CONTROLS */
+#controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn-scan{background:var(--accent);border:none;color:#fff;border-radius:8px;
+  padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;
+  box-shadow:0 2px 8px #8b1a2e30;transition:all .15s;font-family:inherit}
+.btn-scan:hover{background:var(--accentlt)}
+.btn-scan:disabled{background:var(--bg3);color:var(--faint);box-shadow:none;cursor:not-allowed}
+.toggle-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--dim)}
+.toggle{width:36px;height:20px;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0}
+.toggle-knob{position:absolute;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;
+  transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+
+/* ARB CARD */
+.arb-card{border:1px solid var(--border);border-radius:10px;background:var(--card);
+  box-shadow:var(--shadow);margin-bottom:10px;padding:14px 16px}
+.arb-card.has-value{border-color:#8b1a2e40}
+.arb-card.full{border-color:var(--greenbdr);background:var(--greenbg)}
+.arb-meta{display:flex;gap:6px;align-items:center;margin-bottom:5px;flex-wrap:wrap}
+.arb-meta span{font-size:10px;color:var(--faint);font-weight:500}
+.arb-title{font-weight:700;font-size:15px;color:var(--text);margin-bottom:10px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arb-margin{font-family:'Playfair Display',serif;font-size:26px;font-weight:700}
+.arb-profit{color:var(--green);font-size:11px;font-weight:600}
+.legs{display:grid;gap:8px;margin-top:10px}
+.leg{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:11px 12px}
+.leg-bookie-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.leg-odds{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold)}
+.leg-outcome{color:var(--dim);font-size:12px;font-weight:500;margin-bottom:3px}
+.leg-stake{color:var(--faint);font-size:10px;margin-bottom:9px}
+.bookie-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.btn-claim{background:var(--accent);border:none;color:#fff;border-radius:6px;
+  padding:8px 12px;font-size:11px;font-weight:600;cursor:pointer;width:100%;
+  font-family:inherit;transition:all .15s;box-shadow:0 1px 4px #8b1a2e30}
+.btn-claim:hover{background:var(--accentlt)}
+.btn-claim:disabled{opacity:.25;cursor:not-allowed;box-shadow:none}
+.claimed-by{display:flex;align-items:center;gap:6px}
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:700;flex-shrink:0}
+.full-banner{margin-top:10px;padding:8px 12px;background:var(--greenbg);
+  border:1px solid var(--greenbdr);border-radius:6px;
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.full-banner span{color:var(--green);font-size:11px;font-weight:700}
+
+/* COUNTDOWN */
+.countdown{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.countdown-bar{flex:1;height:3px;background:var(--bg3);border-radius:2px}
+.countdown-fill{height:100%;border-radius:2px;transition:width 1s linear}
+.countdown-time{font-size:10px;font-weight:700;min-width:40px;text-align:right}
+
+/* LOG */
+.log-item{padding:12px 14px;border-bottom:1px solid var(--bg3)}
+.log-item:last-child{border-bottom:none}
+
+/* BANKROLL */
+.bank-card{padding:18px;border-radius:10px;margin-bottom:10px}
+.bank-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:14px}
+.bank-stat{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px}
+.bank-stat-l{color:var(--faint);font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.bank-stat-v{color:var(--dim);font-weight:600;font-size:14px;margin-top:1px}
+
+/* ACCOUNTS */
+.acc-card{padding:16px;border-radius:10px;margin-bottom:10px;border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow)}
+.bookie-health{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.bh-item{border-radius:7px;padding:10px 11px}
+
+/* SETTINGS */
+.settings-input{display:flex;gap:8px;margin-top:10px}
+.settings-input input{flex:1;background:#fff;border:1.5px solid var(--border);color:var(--text);
+  font-family:inherit;font-size:13px;padding:10px 12px;border-radius:7px;outline:none}
+.settings-input input:focus{border-color:#8b1a2e80;box-shadow:0 0 0 3px var(--accentbg)}
+.settings-input input::placeholder{color:var(--faint)}
+.btn-save{background:var(--accent);border:none;color:#fff;border-radius:7px;
+  padding:0 16px;font-size:12px;font-weight:600;cursor:pointer;
+  white-space:nowrap;font-family:inherit;box-shadow:0 2px 6px #8b1a2e30}
+
+/* FEED OVERLAY */
+#feed-overlay{position:fixed;inset:0;background:rgba(245,240,235,.97);
+  z-index:200;display:flex;flex-direction:column}
+.feed-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bg3)}
+.feed-chat{padding:12px 14px;border-top:1px solid var(--border);background:var(--card)}
+.feed-chat-row{display:flex;gap:8px;margin-top:8px}
+.feed-chat-row input{flex:1;background:#fff;border:1.5px solid var(--border);color:var(--text);
+  font-family:inherit;font-size:13px;padding:9px 12px;border-radius:7px;outline:none}
+.feed-chat-row input:focus{border-color:#8b1a2e70}
+.btn-send{background:var(--accent);border:none;color:#fff;border-radius:7px;
+  padding:0 14px;font-size:16px;cursor:pointer}
+
+/* BOTTOM NAV */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);
+  border-top:1px solid var(--border);display:flex;z-index:100;
+  box-shadow:0 -2px 10px rgba(0,0,0,.08);
+  padding-bottom:env(safe-area-inset-bottom)}
+.bnav-btn{flex:1;background:none;border:none;display:flex;flex-direction:column;
+  align-items:center;gap:2px;padding:9px 4px;cursor:pointer;
+  font-family:inherit;font-size:9px;font-weight:500;color:var(--faint);transition:color .15s}
+.bnav-btn.on{color:var(--accent)}
+.bnav-icon{font-size:20px}
+
+/* LOGIN */
+#login{min-height:100vh;background:var(--bg);display:flex;align-items:center;
+  justify-content:center;padding:20px}
+.login-box{width:100%;max-width:340px;opacity:0;transform:translateY(12px);transition:all .4s ease}
+.login-box.ready{opacity:1;transform:none}
+.login-title{font-family:'Playfair Display',serif;font-size:44px;font-weight:900;
+  color:var(--accent);letter-spacing:.02em;text-align:center;margin-bottom:4px}
+.login-sub{color:var(--faint);font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+  text-align:center;margin-bottom:30px}
+.login-avatars{display:flex;justify-content:center;gap:16px;margin-bottom:24px}
+.login-avatar-btn{cursor:pointer;text-align:center;transition:all .2s;opacity:.35}
+.login-avatar-btn.sel{opacity:1;transform:scale(1.1)}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:24px;box-shadow:var(--shadow2)}
+.login-input{width:100%;background:#fff;border:1.5px solid var(--border);color:var(--text);
+  font-family:inherit;font-size:14px;padding:11px 14px;border-radius:8px;outline:none;
+  margin-bottom:10px;display:block}
+.login-input:focus{border-color:#8b1a2e80;box-shadow:0 0 0 3px var(--accentbg)}
+.login-input::placeholder{color:var(--faint)}
+.btn-login{width:100%;padding:12px;border-radius:8px;border:none;background:var(--accent);
+  color:#fff;font-family:inherit;font-size:13px;font-weight:600;letter-spacing:.06em;
+  cursor:pointer;box-shadow:0 2px 8px #8b1a2e40;margin-top:6px}
+.login-err{color:var(--red);font-size:12px;text-align:center;background:var(--redbg);
+  padding:7px 10px;border-radius:6px;margin-bottom:10px}
+.login-hint{color:var(--faint);font-size:10px;text-align:center;margin-top:10px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.fadein{animation:fadeUp .2s ease}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box" id="loginBox">
+    <div class="login-title">Arbitron</div>
+    <div class="login-sub">Team Arb Koordination</div>
+    <div class="login-avatars" id="loginAvatars"></div>
+    <div class="login-card">
+      <input class="login-input" id="loginUser" placeholder="username  (du / flo / max / jan)" autocomplete="off" autocapitalize="off"/>
+      <input class="login-input" id="loginPass" type="password" placeholder="passwort  (demo: 1234)"/>
+      <div id="loginErr" style="display:none"></div>
+      <button class="btn-login" onclick="doLogin()">Einloggen →</button>
+      <div class="login-hint">Demo: du/flo/max/jan · Passwort: 1234</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP (hidden until login) -->
+<div id="app" style="display:none">
+  <div id="topbar">
+    <span class="logo">Arbitron</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button onclick="toggleFeed()" id="feedBtn" style="background:none;border:1px solid var(--border);
+        color:var(--faint);border-radius:6px;padding:5px 9px;font-size:14px;cursor:pointer">💬</button>
+      <div id="topUser" style="display:flex;align-items:center;gap:8px"></div>
+      <button onclick="doLogout()" style="background:none;border:1px solid var(--border);
+        color:var(--faint);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer">×</button>
+    </div>
+  </div>
+
+  <div id="stats">
+    <div class="stat"><div class="stat-l">Offene Arbs</div><div class="stat-v" id="statArbs" style="color:var(--accent)">0</div></div>
+    <div class="stat"><div class="stat-l">Live Arbs</div><div class="stat-v" id="statLive" style="color:var(--faint)">0</div></div>
+    <div class="stat"><div class="stat-l">Meine Bank</div><div class="stat-v" id="statBank">€500</div></div>
+  </div>
+
+  <div id="main"></div>
+</div>
+
+<!-- FEED OVERLAY -->
+<div id="feed-overlay" style="display:none">
+  <div style="background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px;
+    display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow)">
+    <span style="font-weight:600;font-size:14px">Team Feed</span>
+    <button onclick="toggleFeed()" style="background:none;border:1px solid var(--border);
+      color:var(--faint);border-radius:5px;padding:4px 10px;font-size:12px;cursor:pointer">✕</button>
+  </div>
+  <div id="feedList" style="flex:1;overflow:auto"></div>
+  <div class="feed-chat">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+      <div id="feedAvatar"></div>
+      <span id="feedUserName" style="font-size:10px;font-weight:600"></span>
+    </div>
+    <div class="feed-chat-row">
+      <input id="chatInput" placeholder="Nachricht…" onkeydown="if(event.key==='Enter')sendChat()"/>
+      <button class="btn-send" onclick="sendChat()">→</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div id="bottom-nav">
+  <button class="bnav-btn on" id="nav-scanner" onclick="setTab('scanner')"><span class="bnav-icon">⚡</span>Scanner</button>
+  <button class="bnav-btn" id="nav-log" onclick="setTab('log')"><span class="bnav-icon">📋</span>Log</button>
+  <button class="bnav-btn" id="nav-bankroll" onclick="setTab('bankroll')"><span class="bnav-icon">💰</span>Bank</button>
+  <button class="bnav-btn" id="nav-accounts" onclick="setTab('accounts')"><span class="bnav-icon">🛡</span>Accounts</button>
+  <button class="bnav-btn" id="nav-settings" onclick="setTab('settings')"><span class="bnav-icon">⚙</span>Setup</button>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const USERS = {
+  du:  {id:"du",  name:"Du",  password:"1234", color:"#8b1a2e", avatar:"D", bankroll:500},
+  flo: {id:"flo", name:"Flo", password:"1234", color:"#9a6f20", avatar:"F", bankroll:500},
+  max: {id:"max", name:"Max", password:"1234", color:"#1e5fa8", avatar:"M", bankroll:500},
+  jan: {id:"jan", name:"Jan", password:"1234", color:"#2d6e3e", avatar:"J", bankroll:500},
+};
+
+const BOOKIE_COLORS = {
+  Bet365:"#00a651",Unibet:"#147cbe",Bwin:"#c0392b","888sport":"#e67e22",
+  Stake:"#27ae60",Betano:"#c0392b",Betfair:"#e67e22",Pinnacle:"#2980b9",
+  "William Hill":"#1a5276",Ladbrokes:"#922b21",
+};
+
+const SCAN_SPORTS = [
+  {key:"tennis_atp_french_open",   label:"ATP French Open"},
+  {key:"tennis_atp_wimbledon",     label:"ATP Wimbledon"},
+  {key:"tennis_atp_us_open",       label:"ATP US Open"},
+  {key:"tennis_atp_australian_open",label:"ATP Australian Open"},
+  {key:"soccer_germany_bundesliga",label:"Bundesliga"},
+  {key:"soccer_epl",               label:"Premier League"},
+  {key:"soccer_uefa_champs_league",label:"Champions League"},
+  {key:"basketball_nba",           label:"NBA"},
+];
+
+const DEMO_OPPS = [
+  {id:"d1",sport:"Tennis",event:"Alcaraz vs Sinner",market:"Match Winner",time:"19:00",
+   legs:[{bookie:"Bet365",outcome:"Alcaraz",odds:2.18,user:null},{bookie:"Betano",outcome:"Sinner",odds:2.12,user:null}],
+   margin:3.4,profit:16.3,stake100:{Alcaraz:53.9,Sinner:46.1},expiresAt:Date.now()+95000,status:"open",source:"demo"},
+  {id:"d2",sport:"Fußball",event:"Dortmund vs Bayern",market:"1X2",time:"20:30",
+   legs:[{bookie:"Unibet",outcome:"Dortmund",odds:3.9,user:null},{bookie:"Bwin",outcome:"Draw",odds:3.6,user:null},{bookie:"Betano",outcome:"Bayern",odds:1.97,user:null}],
+   margin:2.1,profit:13.6,stake100:{Dortmund:25.6,Draw:27.8,Bayern:50.8},expiresAt:Date.now()+230000,status:"open",source:"demo"},
+  {id:"d3",sport:"Tennis",event:"Djokovic vs Zverev",market:"Match Winner",time:"17:00",
+   legs:[{bookie:"Bwin",outcome:"Djokovic",odds:2.42,user:null},{bookie:"Bet365",outcome:"Zverev",odds:1.74,user:null}],
+   margin:4.9,profit:15.2,stake100:{Djokovic:41.3,Zverev:57.5},expiresAt:Date.now()+38000,status:"open",source:"demo"},
+];
+
+const DEMO_LOG = [
+  {id:"l1",event:"Nadal vs Tsitsipas",leg:"Nadal ML",bookie:"Bet365",odds:1.55,stake:180,user:"du",result:"win",pnl:+99,ts:Date.now()-172800000},
+  {id:"l2",event:"Nadal vs Tsitsipas",leg:"Tsitsipas ML",bookie:"Betano",odds:2.70,stake:103,user:"flo",result:"loss",pnl:-103,ts:Date.now()-172800000},
+  {id:"l3",event:"Man City vs Arsenal",leg:"Man City",bookie:"Unibet",odds:2.10,stake:200,user:"max",result:"win",pnl:+220,ts:Date.now()-86400000},
+  {id:"l4",event:"Man City vs Arsenal",leg:"Arsenal",bookie:"888sport",odds:3.20,stake:131,user:"jan",result:"loss",pnl:-131,ts:Date.now()-86400000},
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentUser = null;
+let currentTab  = "scanner";
+let opps        = JSON.parse(JSON.stringify(DEMO_OPPS));
+let betLog      = JSON.parse(JSON.stringify(DEMO_LOG));
+let feed        = [
+  {id:1,user:"flo",type:"bet",msg:"Übernehme Betano — Tsitsipas",ts:Date.now()-3600000},
+  {id:2,user:"max",type:"win",msg:"Man City +€220 🎉",ts:Date.now()-86400000},
+  {id:3,user:"du", type:"alert",msg:"Neue Arb: +4.9% Tennis",ts:Date.now()-1800000},
+];
+let oddsApiKey  = localStorage.getItem("odds-api-key") || "";
+let scanning    = false;
+let autoScan    = false;
+let autoTimer   = null;
+let lastScan    = null;
+let countdownTimers = [];
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function timeAgo(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s<60) return s+"s"; if(s<3600) return Math.floor(s/60)+"m";
+  if(s<86400) return Math.floor(s/3600)+"h"; return Math.floor(s/86400)+"d";
+}
+
+function avatarHTML(user, size=28) {
+  return `<div class="avatar" style="width:${size}px;height:${size}px;background:${user.color}18;
+    border:1.5px solid ${user.color}50;font-size:${size*.38}px;color:${user.color}">${user.avatar}</div>`;
+}
+
+function bookiePill(name) {
+  const c = BOOKIE_COLORS[name]||"#555";
+  return `<span class="bookie-pill" style="background:${c}18;color:${c};border:1px solid ${c}35">${name}</span>`;
+}
+
+function calcArb(legs) {
+  const inv = legs.reduce((s,l)=>s+1/l.odds, 0);
+  return (1/inv - 1)*100;
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  setTimeout(()=>document.getElementById("loginBox").classList.add("ready"), 80);
+  renderLoginAvatars();
+  document.getElementById("loginUser").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+  document.getElementById("loginPass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+};
+
+function renderLoginAvatars() {
+  const el = document.getElementById("loginAvatars");
+  el.innerHTML = Object.values(USERS).map(u=>`
+    <div class="login-avatar-btn" id="la-${u.id}" onclick="selectUser('${u.id}')">
+      ${avatarHTML(u,46)}
+      <div style="color:${u.color};font-size:10px;margin-top:5px;font-weight:600">${u.name}</div>
+    </div>`).join("");
+}
+
+function selectUser(id) {
+  document.getElementById("loginUser").value = id;
+  document.querySelectorAll(".login-avatar-btn").forEach(el=>el.classList.remove("sel"));
+  document.getElementById("la-"+id).classList.add("sel");
+  const errEl = document.getElementById("loginErr");
+  errEl.style.display = "none";
+}
+
+function doLogin() {
+  const id  = document.getElementById("loginUser").value.trim().toLowerCase();
+  const pwd = document.getElementById("loginPass").value;
+  const errEl = document.getElementById("loginErr");
+  const u = USERS[id];
+  if(!u){ errEl.textContent="Unbekannter Username."; errEl.className="login-err"; errEl.style.display="block"; return; }
+  if(u.password!==pwd){ errEl.textContent="Falsches Passwort."; errEl.className="login-err"; errEl.style.display="block"; return; }
+  currentUser = u;
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  addFeed("msg", `${u.name} online 👋`, u.id);
+  renderTopUser();
+  updateStats();
+  renderTab();
+}
+
+function doLogout() {
+  currentUser = null;
+  clearInterval(autoTimer); autoScan=false;
+  document.getElementById("login").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("loginUser").value = "";
+  document.getElementById("loginPass").value = "";
+  document.querySelectorAll(".login-avatar-btn").forEach(el=>el.classList.remove("sel"));
+  document.getElementById("loginErr").style.display="none";
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderTopUser() {
+  const u = currentUser;
+  document.getElementById("topUser").innerHTML = `
+    ${avatarHTML(u,28)}
+    <div><div style="color:${u.color};font-size:12px;font-weight:600">${u.name}</div>
+    <div style="color:var(--faint);font-size:10px">€${u.bankroll}</div></div>`;
+  document.getElementById("feedAvatar").innerHTML = avatarHTML(u,20);
+  document.getElementById("feedUserName").style.color = u.color;
+  document.getElementById("feedUserName").textContent = u.name;
+  document.getElementById("statBank").style.color = u.color;
+  document.getElementById("statBank").textContent = "€"+u.bankroll;
+}
+
+function updateStats() {
+  const open = opps.filter(o=>o.status==="open").length;
+  const live = opps.filter(o=>o.source==="live").length;
+  document.getElementById("statArbs").textContent = open;
+  const liveEl = document.getElementById("statLive");
+  liveEl.textContent = live;
+  liveEl.style.color = live>0 ? "var(--green)" : "var(--faint)";
+}
+
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll(".bnav-btn").forEach(b=>b.classList.remove("on"));
+  document.getElementById("nav-"+tab).classList.add("on");
+  clearCountdownTimers();
+  renderTab();
+}
+
+function clearCountdownTimers() {
+  countdownTimers.forEach(t=>clearInterval(t));
+  countdownTimers = [];
+}
+
+function renderTab() {
+  const el = document.getElementById("main");
+  switch(currentTab) {
+    case "scanner":  el.innerHTML = renderScanner(); startCountdowns(); break;
+    case "log":      el.innerHTML = renderLog(); break;
+    case "bankroll": el.innerHTML = renderBankroll(); break;
+    case "accounts": el.innerHTML = renderAccounts(); break;
+    case "settings": el.innerHTML = renderSettings(); break;
+  }
+}
+
+// ── SCANNER ───────────────────────────────────────────────────────────────────
+function renderScanner() {
+  const liveCount = opps.filter(o=>o.source==="live").length;
+  const scanBtnStyle = scanning || !oddsApiKey
+    ? "background:var(--bg3);color:var(--faint);box-shadow:none;cursor:not-allowed"
+    : "";
+
+  let html = `
+  <div class="card card-pad fadein" style="margin-bottom:14px">
+    <div id="controls">
+      <button class="btn-scan" style="${scanBtnStyle}" onclick="runScan()" ${scanning||!oddsApiKey?"disabled":""}>
+        ${scanning?"⟳  Scanne…":"⚡  Live Scan"}
+      </button>
+      <div class="toggle-wrap" onclick="toggleAuto()">
+        <div class="toggle" id="toggleEl" style="background:${autoScan?"var(--green)":"var(--border)"}">
+          <div class="toggle-knob" style="left:${autoScan?18:2}px"></div>
+        </div>
+        Auto (60s)
+      </div>
+      ${!oddsApiKey?`<span style="color:var(--red);font-size:11px;background:var(--redbg);
+        padding:4px 10px;border-radius:5px">⚠ API Key fehlt — Setup öffnen</span>`:""}
+      ${lastScan?`<span style="color:var(--faint);font-size:10px">Scan: ${lastScan.toLocaleTimeString("de-DE")}</span>`:""}
+      ${liveCount>0?`<span style="color:var(--green);background:var(--greenbg);padding:3px 9px;
+        border-radius:5px;font-size:11px;font-weight:600;border:1px solid var(--greenbdr)">
+        ● ${liveCount} Live</span>`:""}
+    </div>
+  </div>`;
+
+  if(opps.length===0) {
+    html += `<div class="card card-pad" style="text-align:center;color:var(--faint);padding:32px">
+      Keine Arbs gefunden. Scan starten oder API Key prüfen.</div>`;
+  }
+
+  opps.forEach(opp=>{
+    const full = opp.legs.every(l=>l.user);
+    const isLive = opp.source==="live";
+    const marginColor = opp.margin>4?"var(--accent)":opp.margin>2?"var(--gold)":"var(--dim)";
+    const bankroll = currentUser.bankroll;
+
+    let legsHtml = opp.legs.map(leg=>{
+      const claimer = leg.user ? USERS[leg.user] : null;
+      const alreadyIn = opp.legs.some(l=>l.user===currentUser.id);
+      const stakeFor100 = opp.stake100?.[leg.outcome] ?? (100/opp.legs.length);
+      const actualStake = (bankroll * stakeFor100 / 100).toFixed(0);
+
+      return `<div class="leg" style="${claimer?`background:${claimer.color}10;border-color:${claimer.color}50`:""}">
+        <div class="leg-bookie-row">${bookiePill(leg.bookie)}
+          <span class="leg-odds">${leg.odds.toFixed(2)}</span></div>
+        <div class="leg-outcome">${leg.outcome}</div>
+        <div class="leg-stake">Einsatz: €${actualStake} (${stakeFor100.toFixed(0)}%)</div>
+        ${claimer
+          ? `<div class="claimed-by">${avatarHTML(claimer,20)}
+              <span style="color:${claimer.color};font-size:11px;font-weight:600">
+                ${claimer.id===currentUser.id?"Du":claimer.name}</span></div>`
+          : `<button class="btn-claim" onclick="claimLeg('${opp.id}',${opp.legs.indexOf(leg)})"
+              ${alreadyIn?"disabled":""}>⚡ Claim</button>`}
+      </div>`;
+    }).join("");
+
+    html += `
+    <div class="arb-card fadein ${full?"full":opp.margin>3?"has-value":""}" id="opp-${opp.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div style="flex:1;min-width:0">
+          <div class="arb-meta">
+            <span>${opp.sport}</span><span>·</span><span>${opp.time}</span>
+            <span>·</span><span>${opp.market}</span>
+            ${isLive?`<span style="background:var(--greenbg);color:var(--green);
+              border:1px solid var(--greenbdr);border-radius:3px;
+              padding:1px 6px;font-weight:700">LIVE</span>`:""}
+          </div>
+          <div class="arb-title">${opp.event}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:14px">
+          <div class="arb-margin" style="color:${marginColor}">+${opp.margin.toFixed(1)}%</div>
+          <div class="arb-profit">€${opp.profit.toFixed(2)} Profit</div>
+        </div>
+      </div>
+      <div class="countdown" id="cd-${opp.id}">
+        <div class="countdown-bar"><div class="countdown-fill" id="cdf-${opp.id}" style="background:var(--green)"></div></div>
+        <div class="countdown-time" id="cdt-${opp.id}">—</div>
+      </div>
+      <div class="legs" style="grid-template-columns:repeat(${Math.min(opp.legs.length,2)},1fr)">
+        ${legsHtml}
+      </div>
+      ${full?`<div class="full-banner">
+        <span>✓ Vollständig gedeckt</span>
+        <span>Garantiert: €${opp.profit.toFixed(2)}</span>
+      </div>`:""}
+    </div>`;
+  });
+
+  return html;
+}
+
+function startCountdowns() {
+  opps.forEach(opp=>{
+    const fillEl = document.getElementById("cdf-"+opp.id);
+    const timeEl = document.getElementById("cdt-"+opp.id);
+    if(!fillEl||!timeEl) return;
+
+    function update() {
+      const rem = Math.max(0, Math.floor((opp.expiresAt-Date.now())/1000));
+      const total = Math.floor((opp.expiresAt - Date.now())/1000) + rem;
+      const pct = Math.min(100, (rem / Math.max(90,1))*100);
+      const col = rem<30?"var(--red)":rem<90?"var(--gold)":"var(--green)";
+      fillEl.style.width = pct+"%";
+      fillEl.style.background = col;
+      timeEl.style.color = col;
+      timeEl.textContent = rem>=60 ? Math.floor(rem/60)+"m"+String(rem%60).padStart(2,"0")+"s" : rem+"s";
+    }
+    update();
+    countdownTimers.push(setInterval(update, 1000));
+  });
+}
+
+// ── ARB SCAN ─────────────────────────────────────────────────────────────────
+async function runScan() {
+  if(scanning||!oddsApiKey) return;
+  scanning = true;
+  renderTab();
+
+  try {
+    // 1. Get active sports
+    const sRes = await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${oddsApiKey}`);
+    if(!sRes.ok) {
+      alert(`API Fehler ${sRes.status}${sRes.status===401?" — Ungültiger Key. Bitte in Setup prüfen.":""}`);
+      scanning=false; renderTab(); return;
+    }
+    const activeSports = await sRes.json();
+    const activeKeys = new Set(activeSports.map(s=>s.key));
+
+    let found = [];
+    let remaining = "?";
+
+    // 2. Scan each relevant sport
+    for(const sport of SCAN_SPORTS) {
+      if(!activeKeys.has(sport.key)) continue;
+      try {
+        const r = await fetch(
+          `https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${oddsApiKey}&regions=eu&markets=h2h&oddsFormat=decimal`
+        );
+        if(!r.ok) continue;
+        const rem = r.headers.get("x-requests-remaining");
+        if(rem) remaining = rem;
+        const matches = await r.json();
+
+        // Find arbs in these matches
+        for(const match of matches) {
+          const best = {};
+          for(const bm of (match.bookmakers||[])) {
+            for(const mkt of (bm.markets||[])) {
+              if(mkt.key!=="h2h") continue;
+              for(const o of mkt.outcomes) {
+                if(!best[o.name]||best[o.name].odds<o.price)
+                  best[o.name]={odds:o.price,bookie:bm.title,outcome:o.name};
+              }
+            }
+          }
+          const legs = Object.values(best);
+          if(legs.length<2) continue;
+          const invSum = legs.reduce((s,l)=>s+1/l.odds,0);
+          const margin = (1/invSum-1)*100;
+          if(margin>0.2) {
+            const stake100={};
+            legs.forEach(l=>{ stake100[l.outcome]=+((1/l.odds/invSum)*100).toFixed(2); });
+            found.push({
+              id:"live_"+match.id,
+              sport:match.sport_title,
+              event:match.home_team+" vs "+match.away_team,
+              market:"Match Winner",
+              time:new Date(match.commence_time).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}),
+              legs:legs.map(l=>({...l,user:null})),
+              margin:+margin.toFixed(2),
+              profit:+(100*(1/invSum-1)).toFixed(2),
+              stake100,
+              expiresAt:Date.now()+90000,
+              status:"open",
+              source:"live",
+            });
+          }
+        }
+      } catch(e){}
+    }
+
+    // Replace live opps, keep demo
+    found.sort((a,b)=>b.margin-a.margin);
+    opps = [...found, ...opps.filter(o=>o.source==="demo")];
+    lastScan = new Date();
+    updateStats();
+    addFeed("alert", found.length>0 ? `${found.length} Arb${found.length>1?"s":""} gefunden ✓ (${remaining} Requests übrig)` : "Scan fertig — keine Arbs gerade");
+
+  } catch(e) {
+    alert("Netzwerkfehler: "+e.message);
+  }
+
+  scanning = false;
+  renderTab();
+}
+
+function toggleAuto() {
+  autoScan = !autoScan;
+  clearInterval(autoTimer);
+  if(autoScan && oddsApiKey) {
+    runScan();
+    autoTimer = setInterval(runScan, 60000);
+  }
+  renderTab();
+}
+
+function claimLeg(oppId, legIdx) {
+  const opp = opps.find(o=>o.id===oppId);
+  if(!opp) return;
+  opp.legs[legIdx].user = currentUser.id;
+  if(opp.legs.every(l=>l.user)) opp.status = "claimed";
+  else opp.status = "partial";
+  addFeed("bet", `Übernehme ${opp.legs[legIdx].bookie} — ${opp.legs[legIdx].outcome}`);
+  updateStats();
+  renderTab();
+}
+
+// ── LOG ───────────────────────────────────────────────────────────────────────
+function renderLog() {
+  if(!betLog.length) return `<div class="card card-pad" style="text-align:center;color:var(--faint)">Keine Wetten bisher.</div>`;
+  let html = `<div style="color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.08em;margin-bottom:12px">Bet Log</div>
+  <div class="card" style="overflow:hidden">`;
+  html += betLog.map(b=>{
+    const u=USERS[b.user]||{name:b.user,color:"#888",avatar:"?"};
+    return `<div class="log-item fadein">
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+        <div style="display:flex;align-items:center;gap:8px">
+          ${avatarHTML(u,22)}
+          <span style="color:${u.color};font-size:11px;font-weight:600">${u.name}</span>
+        </div>
+        <span style="color:${b.pnl>0?"var(--green)":"var(--red)"};font-weight:700;font-size:14px">
+          ${b.pnl>0?"+":""}€${b.pnl}</span>
+      </div>
+      <div style="color:var(--dim);font-size:12px;font-weight:500;margin-bottom:6px">${b.event}</div>
+      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+        ${bookiePill(b.bookie)}
+        <span style="color:var(--faint);font-size:11px">${b.leg}</span>
+        <span style="color:var(--gold);font-size:12px;font-weight:600">@ ${b.odds}</span>
+        <span style="color:var(--faint);font-size:11px">€${b.stake}</span>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;
+          background:${b.result==="win"?"var(--greenbg)":"var(--redbg)"};
+          color:${b.result==="win"?"var(--green)":"var(--red)"}">
+          ${b.result==="win"?"WIN":"LOSS"}</span>
+        <span style="color:var(--faint);font-size:10px">${timeAgo(b.ts)}</span>
+      </div>
+    </div>`;
+  }).join("");
+  return html+"</div>";
+}
+
+// ── BANKROLL ──────────────────────────────────────────────────────────────────
+function renderBankroll() {
+  const totalBank = Object.values(USERS).reduce((s,u)=>s+u.bankroll,0);
+  let html = `<div style="color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.08em;margin-bottom:12px">Bankroll</div>`;
+
+  html += Object.values(USERS).map(u=>{
+    const pnl=betLog.filter(b=>b.user===u.id).reduce((s,b)=>s+b.pnl,0);
+    const wins=betLog.filter(b=>b.user===u.id&&b.result==="win").length;
+    const total=betLog.filter(b=>b.user===u.id).length;
+    const isMe=u.id===currentUser.id;
+    return `<div class="bank-card card fadein" style="border:${isMe?`1.5px solid ${u.color}60`:"1px solid var(--border)"};
+      background:${isMe?u.color+"06":"var(--card)"}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${avatarHTML(u,36)}
+          <div>
+            <div style="font-weight:700;color:${u.color};font-size:15px">${u.name}</div>
+            <div style="color:var(--faint);font-size:10px;margin-top:1px">${total} Wetten${isMe?" · Ich":""}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700">€${u.bankroll}</div>
+          <div style="color:${pnl>=0?"var(--green)":"var(--red)"};font-size:11px;font-weight:600">
+            ${pnl>=0?"+":""}€${pnl} P&L</div>
+        </div>
+      </div>
+      <div class="bank-stats">
+        ${[
+          {l:"Win Rate",v:total?Math.round(wins/total*100)+"%":"—"},
+          {l:"Anteil",v:Math.round(u.bankroll/totalBank*100)+"%"},
+          {l:"Wetten",v:total},
+        ].map(s=>`<div class="bank-stat">
+          <div class="bank-stat-l">${s.l}</div>
+          <div class="bank-stat-v">${s.v}</div>
+        </div>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+
+  // Distribution bar
+  html += `<div class="card card-pad">
+    <div style="color:var(--faint);font-size:10px;font-weight:600;text-transform:uppercase;
+      letter-spacing:.06em;margin-bottom:10px">Kapitalverteilung</div>
+    <div style="height:12px;border-radius:6px;overflow:hidden;display:flex;gap:3px">
+      ${Object.values(USERS).map(u=>`<div title="${u.name}: €${u.bankroll}"
+        style="flex:${u.bankroll};background:${u.color};opacity:.75"></div>`).join("")}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px">
+      ${Object.values(USERS).map(u=>`<div style="display:flex;align-items:center;gap:5px">
+        <div style="width:9px;height:9px;border-radius:3px;background:${u.color};opacity:.75"></div>
+        <span style="color:var(--dim);font-size:11px;font-weight:500">${u.name} €${u.bankroll}</span>
+      </div>`).join("")}
+    </div>
+  </div>`;
+  return html;
+}
+
+// ── ACCOUNTS ─────────────────────────────────────────────────────────────────
+function renderAccounts() {
+  const bookieData = {
+    du:  [{n:"Bet365",s:"good",last:"2h"},{n:"Unibet",s:"good",last:"1d"},{n:"Bwin",s:"warn",last:"3h"}],
+    flo: [{n:"Betano",s:"good",last:"5h"},{n:"Stake",s:"good",last:"2d"},{n:"888sport",s:"limited",last:"1h"}],
+    max: [{n:"Unibet",s:"good",last:"6h"},{n:"888sport",s:"good",last:"3d"},{n:"Betano",s:"warn",last:"1h"}],
+    jan: [{n:"Bwin",s:"good",last:"4h"},{n:"Stake",s:"good",last:"2h"},{n:"Bet365",s:"good",last:"1d"}],
+  };
+  let html = `<div style="color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.08em;margin-bottom:12px">Account Health — Gubbing Tracker</div>`;
+  html += Object.values(USERS).map(u=>{
+    const isMe=u.id===currentUser.id;
+    const bookies=bookieData[u.id]||[];
+    return `<div class="acc-card fadein" style="${isMe?`border-color:${u.color}50`:""}">
+      <div style="display:flex;align-items:center;gap:8px">
+        ${avatarHTML(u,26)}
+        <span style="color:${u.color};font-weight:600;font-size:14px">${u.name}</span>
+        ${isMe?`<span style="font-size:10px;background:${u.color}15;color:${u.color};
+          padding:2px 7px;border-radius:4px;font-weight:600">Ich</span>`:""}
+      </div>
+      <div class="bookie-health">
+        ${bookies.map(b=>{
+          const sc=b.s==="good"?"var(--green)":b.s==="warn"?"var(--gold)":"var(--red)";
+          const bg=b.s==="good"?"var(--bg)":b.s==="warn"?"var(--goldbg)":"var(--redbg)";
+          return `<div class="bh-item" style="background:${bg};border:1px solid ${b.s==="good"?"var(--border)":sc+"40"}">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              ${bookiePill(b.n)}
+              <div style="width:7px;height:7px;border-radius:50%;background:${sc};align-self:center"></div>
+            </div>
+            <div style="color:var(--faint);font-size:10px;margin-bottom:2px">${b.last} ago</div>
+            <div style="font-size:10px;font-weight:700;color:${sc}">
+              ${b.s==="limited"?"🔴 Limitiert":b.s==="warn"?"⚠ Prüfen":"✓ OK"}
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  }).join("");
+  return html;
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+function renderSettings() {
+  return `
+  <div style="color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.08em;margin-bottom:14px">API Einstellungen</div>
+
+  <div class="card card-pad fadein" style="border:2px solid var(--accent)30;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:5px">The Odds API</div>
+        <div style="color:var(--dim);font-size:11px;line-height:1.7">
+          Scannt Bet365, Unibet, Betano, Bwin, 888sport auf Arbs.<br>
+          Free Trial: 500 Requests gratis · Danach ab $29/mo
+        </div>
+      </div>
+      <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;
+        background:${oddsApiKey?"var(--green)":"var(--border)"};
+        box-shadow:${oddsApiKey?"0 0 6px #2d6e3e80":"none"}"></div>
+    </div>
+    <div class="settings-input">
+      <input id="keyInput" placeholder="API Key eintragen…" value="${oddsApiKey}"
+        onkeydown="if(event.key==='Enter')saveKey()"/>
+      <button class="btn-save" onclick="saveKey()">Speichern</button>
+      <a href="https://the-odds-api.com" target="_blank"
+        style="background:var(--bg);border:1px solid var(--border);color:var(--faint);
+          border-radius:7px;padding:0 12px;font-size:12px;text-decoration:none;
+          display:flex;align-items:center">↗</a>
+    </div>
+    ${oddsApiKey?`<div style="margin-top:10px;color:var(--green);font-size:11px;font-weight:500">
+      ✓ Key gespeichert — bereit zum Scannen</div>`:""}
+  </div>
+
+  <div class="card card-pad fadein" style="margin-bottom:14px">
+    <div style="font-weight:600;font-size:13px;margin-bottom:12px">Gescannte Sports</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${SCAN_SPORTS.map(s=>`
+        <div style="display:flex;align-items:center;gap:7px;background:var(--bg);
+          padding:7px 10px;border-radius:6px;border:1px solid var(--border)">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
+          <span style="color:var(--dim);font-size:11px">${s.label}</span>
+        </div>`).join("")}
+    </div>
+  </div>
+
+  <div style="background:var(--bluebg);border:1px solid var(--blue)30;border-radius:8px;padding:14px">
+    <div style="color:var(--blue);font-weight:600;font-size:12px;margin-bottom:6px">ℹ Wie funktioniert der Scan?</div>
+    <div style="color:var(--dim);font-size:11px;line-height:1.7">
+      1. Holt alle aktiven Sports von The Odds API<br>
+      2. Für jedes Spiel: findet die besten Odds pro Outcome über alle Bookies<br>
+      3. Prüft: 1/oddA + 1/oddB &lt; 1 → Arbitrage!<br>
+      4. Zeigt nur Arbs über 0.2% an, sortiert nach Margin
+    </div>
+  </div>`;
+}
+
+function saveKey() {
+  const k = document.getElementById("keyInput").value.trim();
+  oddsApiKey = k;
+  localStorage.setItem("odds-api-key", k);
+  addFeed("alert","API Key gespeichert ✓");
+  renderTab();
+}
+
+// ── FEED ──────────────────────────────────────────────────────────────────────
+function addFeed(type, msg, uid) {
+  feed.unshift({id:Date.now(), user:uid||currentUser?.id||"du", type, msg, ts:Date.now()});
+  if(feed.length>50) feed.pop();
+  renderFeed();
+}
+
+function renderFeed() {
+  const el = document.getElementById("feedList");
+  if(!el) return;
+  const icons = {bet:"⚡",win:"🎉",alert:"🔔",msg:"💬"};
+  el.innerHTML = feed.map(item=>{
+    const u = USERS[item.user]||{name:item.user,color:"#888",avatar:"?"};
+    return `<div class="feed-item">
+      ${avatarHTML(u,28)}
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;gap:4px">
+          <span style="color:${u.color};font-size:10px;font-weight:600;white-space:nowrap">${u.name}</span>
+          <span style="color:var(--faint);font-size:9px;flex-shrink:0">${timeAgo(item.ts)}</span>
+        </div>
+        <div style="color:var(--dim);font-size:12px;margin-top:2px;line-height:1.4;word-break:break-word">
+          ${icons[item.type]||"·"} ${item.msg}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function toggleFeed() {
+  const el = document.getElementById("feed-overlay");
+  el.style.display = el.style.display==="none"?"flex":"none";
+  if(el.style.display==="flex") { el.style.flexDirection="column"; renderFeed(); }
+  document.getElementById("feedBtn").style.background =
+    el.style.display==="none" ? "none" : "var(--accentbg)";
+  document.getElementById("feedBtn").style.borderColor =
+    el.style.display==="none" ? "var(--border)" : "var(--accent)60";
+  document.getElementById("feedBtn").style.color =
+    el.style.display==="none" ? "var(--faint)" : "var(--accent)";
+}
+
+function sendChat() {
+  const input = document.getElementById("chatInput");
+  const msg = input.value.trim();
+  if(!msg) return;
+  addFeed("msg", msg);
+  input.value = "";
+}
+
+// Enter key for chat
+document.addEventListener("DOMContentLoaded",()=>{
+  const ci = document.getElementById("chatInput");
+  if(ci) ci.addEventListener("keydown", e=>{ if(e.key==="Enter") sendChat(); });
+});
+</script>
+</body>
+</html>
