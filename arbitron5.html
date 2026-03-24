@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Arbitron</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f5f0eb;--bg2:#ede6dd;--bg3:#e4dbd0;
+  --card:#fff;--border:#d4c9bc;--border2:#c4b5a5;
+  --text:#2c1f14;--dim:#6b5344;--faint:#a8917e;
+  --accent:#8b1a2e;--accentlt:#c4314d;--accentbg:#8b1a2e12;
+  --gold:#9a6f20;--goldbg:#fdf3dc;
+  --green:#2d6e3e;--greenbg:#e0f0e6;--greenbdr:#a8d4b4;
+  --red:#b03030;--redbg:#fde8e8;
+  --blue:#1e5fa8;--bluebg:#e0ecf8;
+  --shadow:0 1px 4px rgba(0,0,0,.08);
+  --shadow2:0 2px 12px rgba(0,0,0,.1);
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans','Segoe UI',sans-serif;
+  font-size:13px;min-height:100vh;padding-bottom:72px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+#topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 16px;
+  display:flex;align-items:center;justify-content:space-between;height:52px;
+  position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--accent)}
+#stats{background:var(--card);border-bottom:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(3,1fr)}
+.stat{padding:10px 14px;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-l{color:var(--faint);font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}
+.stat-v{font-size:18px;font-weight:600}
+#main{padding:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);margin-bottom:10px}
+.card-pad{padding:14px 16px}
+.section-label{color:var(--faint);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--bg2);border:1.5px solid var(--border);color:var(--dim);
+  border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:all .15s;white-space:nowrap;user-select:none}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip:hover:not(.on){border-color:var(--border2)}
+.chip.extra{border-style:dashed;background:var(--bg3)}
+.chip.extra.on{background:var(--blue)15;border-color:var(--blue);color:var(--blue);border-style:solid}
+.range-wrap{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.range-wrap input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg3);outline:none}
+.range-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px #8b1a2e40}
+.range-val{font-weight:700;color:var(--accent);font-size:13px;min-width:42px;text-align:right}
+.btn-scan{background:var(--accent);border:none;color:#fff;border-radius:8px;padding:10px 20px;
+  font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px #8b1a2e30;transition:all .15s;font-family:inherit}
+.btn-scan:hover{background:var(--accentlt)}
+.btn-scan:disabled{background:var(--bg3);color:var(--faint);box-shadow:none;cursor:not-allowed}
+.btn-apply{background:var(--green);border:none;color:#fff;border-radius:8px;padding:11px 20px;
+  font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:all .15s;box-shadow:0 2px 8px #2d6e3e30;flex:1}
+.btn-apply:hover{background:#256035}
+.btn-clear{background:none;border:1.5px solid var(--border2);color:var(--dim);
+  border-radius:8px;padding:10px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.toggle-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--dim)}
+.toggle{width:36px;height:20px;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0}
+.toggle-knob{position:absolute;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.arb-card{border:1px solid var(--border);border-radius:10px;background:var(--card);box-shadow:var(--shadow);margin-bottom:10px;padding:14px 16px;animation:fadeUp .2s ease}
+.arb-card.hot{border-color:#8b1a2e40}
+.arb-card.full{border-color:var(--greenbdr);background:var(--greenbg)}
+.arb-title{font-weight:700;font-size:15px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arb-margin{font-family:'Playfair Display',serif;font-size:26px;font-weight:700}
+.legs{display:grid;gap:8px;margin-top:10px}
+.leg{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:11px 12px}
+.leg-odds{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold)}
+.bookie-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.btn-claim{background:var(--accent);border:none;color:#fff;border-radius:6px;padding:8px 12px;
+  font-size:11px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;
+  transition:all .15s;box-shadow:0 1px 4px #8b1a2e30}
+.btn-claim:hover{background:var(--accentlt)}
+.btn-claim:disabled{opacity:.25;cursor:not-allowed;box-shadow:none}
+.full-banner{margin-top:10px;padding:8px 12px;background:var(--greenbg);border:1px solid var(--greenbdr);border-radius:6px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.full-banner span{color:var(--green);font-size:11px;font-weight:700}
+.countdown{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.countdown-bar{flex:1;height:3px;background:var(--bg3);border-radius:2px}
+.countdown-fill{height:100%;border-radius:2px;transition:width 1s linear}
+.countdown-time{font-size:10px;font-weight:700;min-width:40px;text-align:right}
+.log-item{padding:12px 14px;border-bottom:1px solid var(--bg3)}
+.log-item:last-child{border-bottom:none}
+.bank-card{padding:18px;border-radius:10px;margin-bottom:10px;border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow)}
+.bank-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:14px}
+.bank-stat{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px}
+.acc-card{padding:16px;border-radius:10px;margin-bottom:10px;border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow)}
+.bh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.bh-item{border-radius:7px;padding:10px 11px}
+.settings-input{display:flex;gap:8px;margin-top:10px}
+.settings-input input{flex:1;background:#fff;border:1.5px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;padding:10px 12px;border-radius:7px;outline:none}
+.settings-input input:focus{border-color:#8b1a2e80;box-shadow:0 0 0 3px var(--accentbg)}
+.settings-input input::placeholder{color:var(--faint)}
+.btn-save{background:var(--accent);border:none;color:#fff;border-radius:7px;padding:0 16px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+#feed-overlay{position:fixed;inset:0;background:rgba(245,240,235,.97);z-index:200;display:flex;flex-direction:column}
+.feed-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bg3)}
+.feed-chat{padding:12px 14px;border-top:1px solid var(--border);background:var(--card)}
+.feed-chat-row{display:flex;gap:8px;margin-top:8px}
+.feed-chat-row input{flex:1;background:#fff;border:1.5px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;padding:9px 12px;border-radius:7px;outline:none}
+.btn-send{background:var(--accent);border:none;color:#fff;border-radius:7px;padding:0 14px;font-size:16px;cursor:pointer}
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,.08);padding-bottom:env(safe-area-inset-bottom)}
+.bnav-btn{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px;cursor:pointer;font-family:inherit;font-size:9px;font-weight:500;color:var(--faint);transition:color .15s}
+.bnav-btn.on{color:var(--accent)}
+.bnav-icon{font-size:20px}
+.divider{height:1px;background:var(--border);margin:12px 0}
+#login{min-height:100vh;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{width:100%;max-width:340px;opacity:0;transform:translateY(12px);transition:all .4s ease}
+.login-box.ready{opacity:1;transform:none}
+.login-title{font-family:'Playfair Display',serif;font-size:44px;font-weight:900;color:var(--accent);letter-spacing:.02em;text-align:center;margin-bottom:4px}
+.login-sub{color:var(--faint);font-size:11px;letter-spacing:.15em;text-transform:uppercase;text-align:center;margin-bottom:30px}
+.login-avatars{display:flex;justify-content:center;gap:16px;margin-bottom:24px}
+.login-avatar-btn{cursor:pointer;text-align:center;transition:all .2s;opacity:.35}
+.login-avatar-btn.sel{opacity:1;transform:scale(1.1)}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;box-shadow:var(--shadow2)}
+.login-input{width:100%;background:#fff;border:1.5px solid var(--border);color:var(--text);font-family:inherit;font-size:14px;padding:11px 14px;border-radius:8px;outline:none;margin-bottom:10px;display:block}
+.login-input:focus{border-color:#8b1a2e80;box-shadow:0 0 0 3px var(--accentbg)}
+.login-input::placeholder{color:var(--faint)}
+.btn-login{width:100%;padding:12px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:13px;font-weight:600;letter-spacing:.06em;cursor:pointer;box-shadow:0 2px 8px #8b1a2e40;margin-top:6px}
+.login-err{color:var(--red);font-size:12px;text-align:center;background:var(--redbg);padding:7px 10px;border-radius:6px;margin-bottom:10px}
+.login-hint{color:var(--faint);font-size:10px;text-align:center;margin-top:10px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login-box" id="loginBox">
+    <div class="login-title">Arbitron</div>
+    <div class="login-sub">Team Arb Koordination</div>
+    <div class="login-avatars" id="loginAvatars"></div>
+    <div class="login-card">
+      <input class="login-input" id="loginUser" placeholder="username  (du / flo / max / jan)" autocomplete="off" autocapitalize="off"/>
+      <input class="login-input" id="loginPass" type="password" placeholder="passwort  (demo: 1234)"/>
+      <div id="loginErr" style="display:none"></div>
+      <button class="btn-login" onclick="doLogin()">Einloggen →</button>
+      <div class="login-hint">Demo: du / flo / max / jan · Passwort: 1234</div>
+    </div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div id="topbar">
+    <span class="logo">Arbitron</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button onclick="toggleFeed()" id="feedBtn" style="background:none;border:1px solid var(--border);color:var(--faint);border-radius:6px;padding:5px 9px;font-size:14px;cursor:pointer">💬</button>
+      <div id="topUser" style="display:flex;align-items:center;gap:8px"></div>
+      <button onclick="doLogout()" style="background:none;border:1px solid var(--border);color:var(--faint);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer">×</button>
+    </div>
+  </div>
+  <div id="stats">
+    <div class="stat"><div class="stat-l">Arbs</div><div class="stat-v" id="statArbs" style="color:var(--accent)">0</div></div>
+    <div class="stat"><div class="stat-l">Live</div><div class="stat-v" id="statLive" style="color:var(--faint)">0</div></div>
+    <div class="stat"><div class="stat-l">Meine Bank</div><div class="stat-v" id="statBank">€500</div></div>
+  </div>
+  <div id="main"></div>
+</div>
+
+<div id="feed-overlay" style="display:none">
+  <div style="background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow)">
+    <span style="font-weight:600;font-size:14px">Team Feed</span>
+    <button onclick="toggleFeed()" style="background:none;border:1px solid var(--border);color:var(--faint);border-radius:5px;padding:4px 10px;font-size:12px;cursor:pointer">✕</button>
+  </div>
+  <div id="feedList" style="flex:1;overflow:auto"></div>
+  <div class="feed-chat">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+      <div id="feedAvatar"></div>
+      <span id="feedUserName" style="font-size:10px;font-weight:600"></span>
+    </div>
+    <div class="feed-chat-row">
+      <input id="chatInput" placeholder="Nachricht…" onkeydown="if(event.key==='Enter')sendChat()"/>
+      <button class="btn-send" onclick="sendChat()">→</button>
+    </div>
+  </div>
+</div>
+
+<div id="bottom-nav">
+  <button class="bnav-btn on" id="nav-scanner" onclick="setTab('scanner')"><span class="bnav-icon">⚡</span>Scanner</button>
+  <button class="bnav-btn" id="nav-filter" onclick="setTab('filter')"><span class="bnav-icon">🎯</span>Filter</button>
+  <button class="bnav-btn" id="nav-log" onclick="setTab('log')"><span class="bnav-icon">📋</span>Log</button>
+  <button class="bnav-btn" id="nav-bankroll" onclick="setTab('bankroll')"><span class="bnav-icon">💰</span>Bank</button>
+  <button class="bnav-btn" id="nav-settings" onclick="setTab('settings')"><span class="bnav-icon">⚙</span>Setup</button>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const USERS={
+  du: {id:"du", name:"Du", password:"1234",color:"#8b1a2e",avatar:"D",bankroll:500},
+  flo:{id:"flo",name:"Flo",password:"1234",color:"#9a6f20",avatar:"F",bankroll:500},
+  max:{id:"max",name:"Max",password:"1234",color:"#1e5fa8",avatar:"M",bankroll:500},
+  jan:{id:"jan",name:"Jan",password:"1234",color:"#2d6e3e",avatar:"J",bankroll:500},
+};
+const BOOKIE_COLORS={
+  "Bet365":"#00a651","Betano":"#e4002b","Unibet":"#147cbe","Bwin":"#c0392b","Stake":"#27ae60",
+  "Betfair":"#f5a623","Pinnacle":"#2980b9","888sport":"#e67e22","William Hill":"#1a5276",
+  "Ladbrokes":"#922b21","Coral":"#e74c3c","Paddy Power":"#007a33","Interwetten":"#003087",
+  "Tipico":"#e30613","Winamax":"#ff6b00","Coolbet":"#0077c8","Betsafe":"#1a1a2e",
+};
+// API bookie key mapping (The Odds API internal keys)
+const BOOKIE_API_KEYS={
+  "Bet365":"bet365","Betano":"betano","Unibet":"unibet","Bwin":"bwin","Stake":"stake",
+  "Betfair":"betfair","Pinnacle":"pinnacle","888sport":"888sport","William Hill":"williamhill",
+  "Ladbrokes":"ladbrokes","Coral":"coral","Paddy Power":"paddypower","Interwetten":"interwetten",
+  "Tipico":"tipico","Winamax":"winamax","Coolbet":"coolbet","Betsafe":"betsafe",
+};
+const BOOKIES_AKTIV=["Bet365","Betano","Unibet","Bwin","Stake"];
+const BOOKIES_EXTRA=["Betfair","Pinnacle","888sport","William Hill","Ladbrokes","Coral","Paddy Power","Interwetten","Tipico","Winamax"];
+const ALL_SPORTS=["Tennis","Fußball","NBA"];
+const SCAN_SPORTS=[
+  // Tennis — 2 outcomes only (no Draw ever)
+  {key:"tennis_atp_french_open",    sport:"Tennis", twoWay:true},
+  {key:"tennis_atp_wimbledon",      sport:"Tennis", twoWay:true},
+  {key:"tennis_atp_us_open",        sport:"Tennis", twoWay:true},
+  {key:"tennis_atp_australian_open",sport:"Tennis", twoWay:true},
+  // Fußball — 3 outcomes (Heimsieg, Draw, Auswärtssieg)
+  {key:"soccer_germany_bundesliga", sport:"Fußball", twoWay:false},
+  {key:"soccer_epl",                sport:"Fußball", twoWay:false},
+  {key:"soccer_uefa_champs_league", sport:"Fußball", twoWay:false},
+  {key:"soccer_germany_2",          sport:"Fußball", twoWay:false},
+  {key:"soccer_spain_la_liga",      sport:"Fußball", twoWay:false},
+  {key:"soccer_italy_serie_a",      sport:"Fußball", twoWay:false},
+  // NBA — 2 outcomes only (no Draw)
+  {key:"basketball_nba",            sport:"NBA", twoWay:true},
+];
+
+const DEMO_OPPS=[]; // Keine Demo-Daten — nur echte Spiele vom Scan
+const DEMO_LOG=[
+  {id:"l1",event:"Nadal vs Tsitsipas",leg:"Nadal ML",bookie:"Bet365",odds:1.55,stake:180,user:"du",result:"win",pnl:+99,ts:Date.now()-172800000},
+  {id:"l2",event:"Nadal vs Tsitsipas",leg:"Tsitsipas ML",bookie:"Betano",odds:2.70,stake:103,user:"flo",result:"loss",pnl:-103,ts:Date.now()-172800000},
+  {id:"l3",event:"Man City vs Arsenal",leg:"Man City",bookie:"Unibet",odds:2.10,stake:200,user:"max",result:"win",pnl:+220,ts:Date.now()-86400000},
+  {id:"l4",event:"Man City vs Arsenal",leg:"Arsenal",bookie:"888sport",odds:3.20,stake:131,user:"jan",result:"loss",pnl:-131,ts:Date.now()-86400000},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentUser=null,currentTab="scanner";
+let opps=JSON.parse(JSON.stringify(DEMO_OPPS));
+let betLog=JSON.parse(JSON.stringify(DEMO_LOG));
+let feed=[
+  {id:1,user:"flo",type:"bet",msg:"Übernehme Betano — Tsitsipas",ts:Date.now()-3600000},
+  {id:2,user:"max",type:"win",msg:"Man City +€220 🎉",ts:Date.now()-86400000},
+  {id:3,user:"du",type:"alert",msg:"Neue Arb: +4.9% Tennis",ts:Date.now()-1800000},
+];
+let oddsApiKey=localStorage.getItem("odds-api-key")||"";
+let scanning=false,autoScan=false,autoTimer=null,lastScan=null,cdTimers=[];
+
+// ── FILTERS (persisted) ───────────────────────────────────────────────────────
+let F=JSON.parse(localStorage.getItem("arb-filters")||JSON.stringify({
+  sports:["Tennis","Fußball","NBA"],
+  timeHours:72,
+  bookies:[...BOOKIES_AKTIV],
+  minMargin:0.2,
+  minOdds:1.3,
+  maxOdds:10.0,
+}));
+function saveF(){localStorage.setItem("arb-filters",JSON.stringify(F));}
+
+// ── UTILS ──────────────────────────────────────────────────────────────────────
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return s+"s"; if(s<3600) return Math.floor(s/60)+"m";
+  if(s<86400) return Math.floor(s/3600)+"h"; return Math.floor(s/86400)+"d";
+}
+function av(u,size=28){
+  return`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${u.color}18;
+    border:1.5px solid ${u.color}50;display:flex;align-items:center;justify-content:center;
+    font-size:${size*.38}px;font-weight:700;color:${u.color};flex-shrink:0">${u.avatar}</div>`;
+}
+function bp(name){
+  const c=BOOKIE_COLORS[name]||"#555";
+  return`<span class="bookie-pill" style="background:${c}18;color:${c};border:1px solid ${c}35">${name}</span>`;
+}
+
+// ── LOGIN ──────────────────────────────────────────────────────────────────────
+window.onload=()=>{
+  setTimeout(()=>document.getElementById("loginBox").classList.add("ready"),80);
+  document.getElementById("loginAvatars").innerHTML=Object.values(USERS).map(u=>`
+    <div class="login-avatar-btn" id="la-${u.id}" onclick="pickUser('${u.id}')">
+      ${av(u,46)}<div style="color:${u.color};font-size:10px;margin-top:5px;font-weight:600">${u.name}</div>
+    </div>`).join("");
+  ["loginUser","loginPass"].forEach(id=>
+    document.getElementById(id).addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();}));
+};
+function pickUser(id){
+  document.getElementById("loginUser").value=id;
+  document.querySelectorAll(".login-avatar-btn").forEach(el=>el.classList.remove("sel"));
+  document.getElementById("la-"+id).classList.add("sel");
+  document.getElementById("loginErr").style.display="none";
+}
+function doLogin(){
+  const id=document.getElementById("loginUser").value.trim().toLowerCase();
+  const pwd=document.getElementById("loginPass").value;
+  const u=USERS[id], err=document.getElementById("loginErr");
+  if(!u){err.textContent="Unbekannter Username.";err.className="login-err";err.style.display="block";return;}
+  if(u.password!==pwd){err.textContent="Falsches Passwort.";err.className="login-err";err.style.display="block";return;}
+  currentUser=u;
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+  addFeed("msg",`${u.name} online 👋`,u.id);
+  renderTopUser(); updateStats(); renderTab();
+}
+function doLogout(){
+  currentUser=null; clearInterval(autoTimer); autoScan=false;
+  document.getElementById("login").style.display="flex";
+  document.getElementById("app").style.display="none";
+  document.getElementById("loginUser").value="";
+  document.getElementById("loginPass").value="";
+  document.querySelectorAll(".login-avatar-btn").forEach(el=>el.classList.remove("sel"));
+  document.getElementById("loginErr").style.display="none";
+}
+
+// ── RENDER CORE ────────────────────────────────────────────────────────────────
+function renderTopUser(){
+  const u=currentUser;
+  document.getElementById("topUser").innerHTML=`${av(u,28)}
+    <div><div style="color:${u.color};font-size:12px;font-weight:600">${u.name}</div>
+    <div style="color:var(--faint);font-size:10px">€${u.bankroll}</div></div>`;
+  document.getElementById("feedAvatar").innerHTML=av(u,20);
+  document.getElementById("feedUserName").style.color=u.color;
+  document.getElementById("feedUserName").textContent=u.name;
+  document.getElementById("statBank").style.color=u.color;
+  document.getElementById("statBank").textContent="€"+u.bankroll;
+}
+function updateStats(){
+  document.getElementById("statArbs").textContent=opps.filter(o=>o.status==="open").length;
+  const live=opps.filter(o=>o.source==="live").length;
+  const el=document.getElementById("statLive");
+  el.textContent=live; el.style.color=live>0?"var(--green)":"var(--faint)";
+}
+function renderTab(){
+  cdTimers.forEach(t=>clearInterval(t)); cdTimers=[];
+  const el=document.getElementById("main");
+  switch(currentTab){
+    case "scanner":  el.innerHTML=renderScanner(); startCountdowns(); break;
+    case "filter":   el.innerHTML=renderFilter(); break;
+    case "log":      el.innerHTML=renderLog(); break;
+    case "bankroll": el.innerHTML=renderBankroll(); break;
+    case "accounts": el.innerHTML=renderAccounts(); break;
+    case "settings": el.innerHTML=renderSettings(); break;
+  }
+}
+function setTab(tab){
+  currentTab=tab;
+  document.querySelectorAll(".bnav-btn").forEach(b=>b.classList.remove("on"));
+  const n=document.getElementById("nav-"+tab);
+  if(n) n.classList.add("on");
+  renderTab();
+}
+
+// ── FILTER TAB ─────────────────────────────────────────────────────────────────
+function renderFilter(){
+  return`
+  <div class="card card-pad">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-weight:700;font-size:15px">Filter & Bookies</div>
+      <button class="btn-clear" onclick="resetF()">Zurücksetzen</button>
+    </div>
+
+    <!-- SPORT -->
+    <div class="section-label">Sportart</div>
+    <div class="chip-row" style="margin-bottom:4px">
+      ${ALL_SPORTS.map(s=>`<button class="chip ${F.sports.includes(s)?"on":""}"
+        onclick="toggleArr('sports','${s}')">${s}</button>`).join("")}
+    </div>
+    <div style="color:var(--faint);font-size:10px;margin-bottom:14px">Nur gewählte Sports werden gescannt</div>
+
+    <div class="divider"></div>
+
+    <!-- EURE BOOKIES -->
+    <div class="section-label" style="margin-top:12px">
+      Eure Bookies
+      <span style="font-size:9px;color:var(--faint);font-weight:400;margin-left:4px">aktiv registriert</span>
+    </div>
+    <div class="chip-row" style="margin-bottom:4px">
+      ${BOOKIES_AKTIV.map(b=>{
+        const on=F.bookies.includes(b);
+        const c=BOOKIE_COLORS[b]||"var(--accent)";
+        return`<button class="chip ${on?"on":""}" onclick="toggleArr('bookies','${b}')"
+          style="background:${on?c:"var(--bg2)"};border-color:${on?c:"var(--border)"};color:${on?"#fff":"var(--dim)"}">
+          ${b}</button>`;
+      }).join("")}
+    </div>
+    <div style="color:var(--faint);font-size:10px;margin-bottom:14px">Arbs werden nur zwischen diesen Bookies gesucht</div>
+
+    <!-- WEITERE BOOKIES -->
+    <div class="section-label">
+      Weitere Bookies
+      <span style="font-size:9px;color:var(--faint);font-weight:400;margin-left:4px">noch nicht registriert</span>
+    </div>
+    <div class="chip-row" style="margin-bottom:4px">
+      ${BOOKIES_EXTRA.map(b=>`<button class="chip extra ${F.bookies.includes(b)?"on":""}"
+        onclick="toggleArr('bookies','${b}')">${b}</button>`).join("")}
+    </div>
+    <div style="background:var(--bluebg);border:1px solid var(--blue)25;border-radius:7px;
+      padding:9px 12px;margin-bottom:16px;color:var(--blue);font-size:11px;line-height:1.6">
+      💡 Je mehr Bookies, desto mehr Arbs. Lohnt sich anzumelden!<br>
+      Aktivierte Extra-Bookies werden im Scan mitberücksichtigt.
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- MARGIN -->
+    <div class="section-label" style="margin-top:12px">Mindest-Margin (garantierter Gewinn %)</div>
+    <div class="range-wrap">
+      <input type="range" min="0.1" max="5" step="0.1" value="${F.minMargin}"
+        oninput="F.minMargin=parseFloat(this.value);document.getElementById('vMargin').textContent=parseFloat(this.value).toFixed(1)+'%'"/>
+      <span class="range-val" id="vMargin">${F.minMargin.toFixed(1)}%</span>
+    </div>
+
+    <!-- MIN ODDS -->
+    <div class="section-label">Mindest-Quote (pro Leg)</div>
+    <div class="range-wrap">
+      <input type="range" min="1.05" max="5" step="0.05" value="${F.minOdds}"
+        oninput="F.minOdds=parseFloat(this.value);document.getElementById('vMinO').textContent=parseFloat(this.value).toFixed(2)"/>
+      <span class="range-val" id="vMinO">${F.minOdds.toFixed(2)}</span>
+    </div>
+
+    <!-- MAX ODDS -->
+    <div class="section-label">Maximal-Quote (pro Leg)</div>
+    <div class="range-wrap">
+      <input type="range" min="1.5" max="20" step="0.5" value="${F.maxOdds}"
+        oninput="F.maxOdds=parseFloat(this.value);document.getElementById('vMaxO').textContent=parseFloat(this.value).toFixed(1)"/>
+      <span class="range-val" id="vMaxO">${F.maxOdds.toFixed(1)}</span>
+    </div>
+
+    <!-- ZEITFENSTER -->
+    <div class="section-label" style="margin-top:4px">Zeitfenster (wie weit vorausschauen)</div>
+    <div class="chip-row" style="margin-bottom:16px">
+      ${[
+        {h:6,  label:"6h"},
+        {h:24, label:"24h"},
+        {h:48, label:"2 Tage"},
+        {h:72, label:"3 Tage"},
+        {h:168,label:"1 Woche"},
+      ].map(opt=>`<button class="chip ${(F.timeHours||72)===opt.h?"on":""}"
+        onclick="F.timeHours=${opt.h};saveF();setTab('filter')">${opt.label}</button>`).join('')}
+    </div>
+
+    <!-- APPLY -->
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="btn-apply" onclick="applyF()">
+        ✓ Filter anwenden &amp; neu scannen
+      </button>
+    </div>
+
+    <!-- ACTIVE SUMMARY -->
+    <div style="margin-top:14px;padding:10px 12px;background:var(--bg2);border-radius:7px;
+      border:1px solid var(--border)">
+      <div style="color:var(--faint);font-size:10px;font-weight:600;margin-bottom:6px">AKTIVE FILTER</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${F.sports.map(s=>`<span style="background:var(--accentbg);color:var(--accent);
+          font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid var(--accent)30">${s}</span>`).join("")}
+        <span style="background:var(--bluebg);color:var(--blue);font-size:10px;font-weight:600;
+          padding:2px 8px;border-radius:10px;border:1px solid var(--blue)30">${F.bookies.length} Bookies</span>
+        <span style="background:var(--greenbg);color:var(--green);font-size:10px;font-weight:600;
+          padding:2px 8px;border-radius:10px;border:1px solid var(--greenbdr)">
+          Min ${F.minMargin.toFixed(1)}% · ${F.minOdds.toFixed(2)}–${F.maxOdds.toFixed(1)}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleArr(key,val){
+  const arr=F[key], idx=arr.indexOf(val);
+  if(idx>-1) arr.splice(idx,1); else arr.push(val);
+  setTab("filter");
+}
+function resetF(){
+  F={sports:["Tennis","Fußball","NBA"],
+  timeHours:72,bookies:[...BOOKIES_AKTIV],minMargin:0.2,minOdds:1.3,maxOdds:10.0};
+  saveF(); setTab("filter");
+}
+function applyF(){
+  saveF();
+  // Filter demo opps immediately
+  opps=opps.filter(o=>{
+    if(o.source==="live") return false;
+    if(!F.sports.some(s=>o.sport===s)) return false;
+    if(!o.legs.some(l=>F.bookies.includes(l.bookie))) return false;
+    if(o.margin<F.minMargin) return false;
+    if(!o.legs.every(l=>l.odds>=F.minOdds&&l.odds<=F.maxOdds)) return false;
+    return true;
+  });
+  updateStats();
+  if(oddsApiKey){ runScan(); }
+  else{ addFeed("alert","Filter gespeichert — kein API Key, nur Demo-Daten"); setTab("scanner"); }
+}
+
+// ── SCANNER ────────────────────────────────────────────────────────────────────
+function renderScanner(){
+  const liveCount=opps.filter(o=>o.source==="live").length;
+  let html=`
+  <div class="card card-pad">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px">
+      <button class="btn-scan" onclick="runScan()" ${scanning||!oddsApiKey?"disabled":""}
+        style="${scanning||!oddsApiKey?"background:var(--bg3);color:var(--faint);box-shadow:none;cursor:not-allowed":""}">
+        ${scanning?"⟳  Scanne…":"⚡  Live Scan"}
+      </button>
+      <div class="toggle-wrap" onclick="toggleAuto()">
+        <div class="toggle" style="background:${autoScan?"var(--green)":"var(--border)"}">
+          <div class="toggle-knob" style="left:${autoScan?18:2}px"></div>
+        </div>
+        Auto (60s)
+      </div>
+      ${!oddsApiKey?`<span style="color:var(--red);font-size:11px;background:var(--redbg);padding:4px 10px;border-radius:5px">⚠ Kein API Key — Setup öffnen</span>`:""}
+      ${lastScan?`<span style="color:var(--faint);font-size:10px">Zuletzt: ${lastScan.toLocaleTimeString("de-DE")}</span>`:""}
+      ${liveCount>0?`<span style="color:var(--green);background:var(--greenbg);padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;border:1px solid var(--greenbdr)">● ${liveCount} Live</span>`:""}
+    </div>
+    <!-- Filter summary + quick link -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${F.sports.map(s=>`<span style="background:var(--accentbg);color:var(--accent);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid var(--accent)25">${s}</span>`).join("")}
+        <span style="background:var(--bluebg);color:var(--blue);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid var(--blue)25">${F.bookies.length} Bookies</span>
+        <span style="background:var(--greenbg);color:var(--green);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid var(--greenbdr)">≥${F.minMargin.toFixed(1)}% · ${F.timeHours>=168?'1 Woche':F.timeHours>=72?'3 Tage':F.timeHours>=48?'2 Tage':F.timeHours+'h'}</span>
+      </div>
+      <button onclick="setTab('filter')" style="background:none;border:1px solid var(--border2);color:var(--dim);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">🎯 Filter</button>
+    </div>
+  </div>`;
+
+  if(opps.length===0){
+    html+=`<div class="card card-pad" style="text-align:center;color:var(--faint);padding:32px;line-height:1.9">
+      ${oddsApiKey
+        ? `<div style="font-size:28px;margin-bottom:10px">🎾⚽🏀</div>
+           <div style="color:var(--dim);font-weight:600;margin-bottom:6px">Keine Arbs in den nächsten 24h</div>
+           <div style="font-size:11px">Zeitfenster: ${F.timeHours>=168?'1 Woche':F.timeHours>=48?F.timeHours/24+' Tage':F.timeHours+'h'} · ${F.bookies.length} Bookies<br>Filter lockern oder Zeitfenster erweitern.</div>`
+        : `<div style="font-size:28px;margin-bottom:10px">🔑</div>
+           <div style="color:var(--dim);font-weight:600;margin-bottom:6px">Kein API Key</div>
+           <div style="font-size:11px">Bitte in ⚙ Setup eintragen.</div>`}
+    </div>`;
+  }
+
+  opps.forEach(opp=>{
+    const full=opp.legs.every(l=>l.user);
+    const isLive=opp.source==="live";
+    const mc=opp.margin>4?"var(--accent)":opp.margin>2?"var(--gold)":"var(--dim)";
+    const bankroll=currentUser.bankroll;
+    const legsHtml=opp.legs.map(leg=>{
+      const claimer=leg.user?USERS[leg.user]:null;
+      const alreadyIn=opp.legs.some(l=>l.user===currentUser.id);
+      const s100=opp.stake100?.[leg.outcome]??(100/opp.legs.length);
+      const stake=(bankroll*s100/100).toFixed(0);
+      return`<div class="leg" style="${claimer?`background:${claimer.color}10;border-color:${claimer.color}50`:""}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          ${bp(leg.bookie)}<span class="leg-odds">${leg.odds.toFixed(2)}</span>
+        </div>
+        <div style="color:var(--dim);font-size:12px;font-weight:500;margin-bottom:3px">${leg.outcome}</div>
+        <div style="color:var(--faint);font-size:10px;margin-bottom:9px">Einsatz: €${stake} (${s100.toFixed(0)}%)</div>
+        ${claimer
+          ?`<div style="display:flex;align-items:center;gap:6px">${av(claimer,20)}
+              <span style="color:${claimer.color};font-size:11px;font-weight:600">${claimer.id===currentUser.id?"Du":claimer.name}</span></div>`
+          :`<button class="btn-claim" onclick="claimLeg('${opp.id}',${opp.legs.indexOf(leg)})"
+              ${alreadyIn?"disabled":""}>⚡ Claim</button>`}
+      </div>`;
+    }).join("");
+
+    html+=`<div class="arb-card ${full?"full":opp.margin>3?"hot":""}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-size:10px;color:var(--faint);font-weight:500">${opp.sport}</span>
+            <span style="color:var(--border2)">·</span>
+            <span style="font-size:10px;color:var(--faint)">${opp.time}</span>
+            <span style="color:var(--border2)">·</span>
+            <span style="font-size:10px;color:var(--faint)">${opp.market}</span>
+            ${isLive?`<span style="background:var(--greenbg);color:var(--green);border:1px solid var(--greenbdr);border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">LIVE</span>`:""}
+          </div>
+          <div class="arb-title">${opp.event}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:14px">
+          <div class="arb-margin" style="color:${mc}">+${opp.margin.toFixed(1)}%</div>
+          <div style="color:var(--green);font-size:11px;font-weight:600">€${opp.profit.toFixed(2)} Profit</div>
+        </div>
+      </div>
+      <div class="countdown">
+        <div class="countdown-bar"><div class="countdown-fill" id="cdf-${opp.id}"></div></div>
+        <div class="countdown-time" id="cdt-${opp.id}">—</div>
+      </div>
+      <div class="legs" style="grid-template-columns:repeat(${Math.min(opp.legs.length,2)},1fr)">
+        ${legsHtml}
+      </div>
+      ${full?`<div class="full-banner"><span>✓ Vollständig gedeckt</span><span>Garantiert: €${opp.profit.toFixed(2)}</span></div>`:""}
+    </div>`;
+  });
+  return html;
+}
+
+function startCountdowns(){
+  opps.forEach(opp=>{
+    const fill=document.getElementById("cdf-"+opp.id);
+    const time=document.getElementById("cdt-"+opp.id);
+    if(!fill||!time) return;
+    function upd(){
+      const rem=Math.max(0,Math.floor((opp.expiresAt-Date.now())/1000));
+      const pct=Math.min(100,(rem/90)*100);
+      const col=rem<30?"var(--red)":rem<90?"var(--gold)":"var(--green)";
+      fill.style.width=pct+"%"; fill.style.background=col; time.style.color=col;
+      time.textContent=rem>=60?Math.floor(rem/60)+"m"+String(rem%60).padStart(2,"0")+"s":rem+"s";
+    }
+    upd(); cdTimers.push(setInterval(upd,1000));
+  });
+}
+
+// ── REAL SCAN ──────────────────────────────────────────────────────────────────
+
+// Sports where Draw is a valid outcome (3-way market)
+const THREE_WAY_SPORTS = new Set(["Fußball"]);
+// Per sport-key override: always 2-way regardless of sport name
+const TWO_WAY_KEYS = new Set([
+  "tennis_atp_french_open","tennis_atp_wimbledon",
+  "tennis_atp_us_open","tennis_atp_australian_open",
+  "basketball_nba",
+]);
+
+// Normalize bookie title from API to our display name
+function normalizeBookie(apiKey, apiTitle){
+  // Try exact API key match first
+  const byKey = Object.keys(BOOKIE_API_KEYS).find(k => BOOKIE_API_KEYS[k] === apiKey);
+  if(byKey && F.bookies.includes(byKey)) return byKey;
+  // Try title match (case-insensitive)
+  const byTitle = F.bookies.find(b => b.toLowerCase() === apiTitle.toLowerCase());
+  if(byTitle) return byTitle;
+  return null; // not in our selected bookies
+}
+
+async function runScan(){
+  if(scanning||!oddsApiKey) return;
+  scanning=true; renderTab();
+  try {
+    // 1. Get active sports
+    const sRes=await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${oddsApiKey}`);
+    if(!sRes.ok){
+      alert(`API Fehler ${sRes.status}${sRes.status===401?" — Ungültiger Key. Bitte in Setup prüfen.":""}`);
+      scanning=false; renderTab(); return;
+    }
+    const activeSports=await sRes.json();
+    const activeKeys=new Set(activeSports.map(s=>s.key));
+
+    // 2. Which sports to scan based on filter
+    const sportsToScan=SCAN_SPORTS.filter(s=>F.sports.includes(s.sport)&&activeKeys.has(s.key));
+
+    // 3. Build bookie param — use regions=eu if no specific bookies known to API
+    const bookieKeys=F.bookies.map(b=>BOOKIE_API_KEYS[b]).filter(Boolean);
+
+    let found=[], remaining="?";
+    const now = Date.now();
+
+    for(const sport of sportsToScan){
+      try{
+        // Use bookmakers param if we have keys, else fallback to eu region
+        const bookieParam = bookieKeys.length > 0
+          ? `&bookmakers=${bookieKeys.join(",")}`
+          : `&regions=eu`;
+        const url=`https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${oddsApiKey}${bookieParam}&markets=h2h&oddsFormat=decimal`;
+        const r=await fetch(url);
+        if(!r.ok) continue;
+        const rem=r.headers.get("x-requests-remaining");
+        if(rem) remaining=rem;
+        const matches=await r.json();
+        // twoWay flag takes priority, then sport name check
+const isThreeWay = !sport.twoWay && THREE_WAY_SPORTS.has(sport.sport);
+
+        for(const match of matches){
+          // Only games within selected time window
+          const commenceMs = new Date(match.commence_time).getTime();
+          const cutoff = Date.now() + (F.timeHours||72)*60*60*1000;
+          if(commenceMs <= Date.now()) continue;
+          if(commenceMs > cutoff) continue;
+
+          // Build best-odds map: outcome -> {odds, bookie}
+          // Only include bookies in our filter
+          const best={};
+          for(const bm of (match.bookmakers||[])){
+            const displayName = normalizeBookie(bm.key, bm.title);
+            if(!displayName) continue; // bookie not in our list
+
+            for(const mkt of (bm.markets||[])){
+              if(mkt.key!=="h2h") continue;
+              for(const o of mkt.outcomes){
+                // For tennis/basketball/NFL: skip "Draw" outcomes — they don't exist
+                if(!isThreeWay && o.name==="Draw") continue;
+                // Odds range filter
+                if(o.price<F.minOdds||o.price>F.maxOdds) continue;
+                // Keep best (highest) odd for each outcome
+                if(!best[o.name]||best[o.name].odds<o.price)
+                  best[o.name]={odds:o.price,bookie:displayName,outcome:o.name};
+              }
+            }
+          }
+
+          const legs=Object.values(best);
+
+          // Need exactly 2 legs for tennis/NBA/NFL, 2-3 for football
+          if(isThreeWay){
+            // For 3-way: need all 3 outcomes covered by different bookies to be a real arb
+            // But we can still arb with 2 legs if one bookie covers both
+            if(legs.length < 2) continue;
+          } else {
+            // For 2-way sports: must have exactly 2 outcomes (home + away)
+            // Verify the two outcomes are the actual players/teams, not Draw
+            if(legs.length !== 2) continue;
+          }
+
+          // Arb calculation
+          const invSum=legs.reduce((s,l)=>s+1/l.odds,0);
+          const margin=(1/invSum-1)*100;
+          if(margin<F.minMargin) continue;
+
+          // Only valid arb if invSum < 1
+          if(invSum>=1) continue;
+
+          // Calculate optimal stake distribution for €100 total
+          const stake100={};
+          legs.forEach(l=>{stake100[l.outcome]=+((1/l.odds/invSum)*100).toFixed(2);});
+
+          // Format time
+          const gameDate = new Date(match.commence_time);
+          const isToday = gameDate.toDateString()===new Date().toDateString();
+          const timeStr = isToday
+            ? gameDate.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})
+            : gameDate.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"})+" "+gameDate.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+
+          found.push({
+            id:"live_"+match.id,
+            sport:sport.sport,
+            event:`${match.home_team} vs ${match.away_team}`,
+            market: isThreeWay ? "1X2" : "Match Winner",
+            time: timeStr,
+            legs:legs.map(l=>({...l,user:null})),
+            margin:+margin.toFixed(2),
+            profit:+(100*(1/invSum-1)).toFixed(2),
+            stake100,
+            expiresAt:Date.now()+90000,
+            status:"open",source:"live",
+          });
+        }
+      }catch(e){console.error(sport.key,e);}
+    }
+
+    found.sort((a,b)=>b.margin-a.margin);
+    // Remove old live opps, keep demo
+    opps=[...found,...opps.filter(o=>o.source==="demo")];
+    lastScan=new Date();
+    updateStats();
+    addFeed("alert",found.length>0
+      ?`${found.length} Arb${found.length>1?"s":""} gefunden ✓ (${remaining} Req. übrig)`
+      :"Scan fertig — keine Arbs mit diesen Filtern");
+  }catch(e){alert("Netzwerkfehler: "+e.message);}
+  scanning=false; setTab("scanner");
+}
+
+function toggleAuto(){
+  autoScan=!autoScan; clearInterval(autoTimer);
+  if(autoScan&&oddsApiKey){runScan(); autoTimer=setInterval(runScan,60000);}
+  renderTab();
+}
+function claimLeg(oppId,legIdx){
+  const opp=opps.find(o=>o.id===oppId); if(!opp) return;
+  opp.legs[legIdx].user=currentUser.id;
+  opp.status=opp.legs.every(l=>l.user)?"claimed":"partial";
+  addFeed("bet",`Übernehme ${opp.legs[legIdx].bookie} — ${opp.legs[legIdx].outcome}`);
+  updateStats(); renderTab();
+}
+
+// ── LOG ────────────────────────────────────────────────────────────────────────
+function renderLog(){
+  if(!betLog.length) return`<div class="card card-pad" style="text-align:center;color:var(--faint)">Keine Wetten bisher.</div>`;
+  return`<div style="color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Bet Log</div>
+  <div class="card">${betLog.map(b=>{
+    const u=USERS[b.user]||{name:b.user,color:"#888",avatar:"?"};
+    return`<div class="log-item">
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+        <div style="display:flex;align-items:center;gap:8px">${av(u,22)}
+          <span style="color:${u.color};font-size:11px;font-weight:600">${u.name}</span></div>
+        <span style="color:${b.pnl>0?"var(--green)":"var(--red)"};font-weight:700;font-size:14px">${b.pnl>0?"+":""}€${b.pnl}</span>
+      </div>
+      <div style="color:var(--dim);font-size:12px;font-weight:500;margin-bottom:6px">${b.event}</div>
+      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+        ${bp(b.bookie)}
+        <span style="color:var(--faint);font-size:11px">${b.leg}</span>
+        <span style="color:var(--gold);font-size:12px;font-weight:600">@ ${b.odds}</span>
+        <span style="color:var(--faint);font-size:11px">€${b.stake}</span>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;
+          background:${b.result==="win"?"var(--greenbg)":"var(--redbg)"};
+          color:${b.result==="win"?"var(--green)":"var(--red)"}">
+          ${b.result==="win"?"WIN":"LOSS"}</span>
+      </div>
+    </div>`;
+  }).join("")}</div>`;
+}
+
+// ── BANKROLL ───────────────────────────────────────────────────────────────────
+function renderBankroll(){
+  const tb=Object.values(USERS).reduce((s,u)=>s+u.bankroll,0);
+  let html=`<div style="color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Bankroll</div>`;
+  html+=Object.values(USERS).map(u=>{
+    const pnl=betLog.filter(b=>b.user===u.id).reduce((s,b)=>s+b.pnl,0);
+    const wins=betLog.filter(b=>b.user===u.id&&b.result==="win").length;
+    const total=betLog.filter(b=>b.user===u.id).length;
+    const isMe=u.id===currentUser.id;
+    return`<div class="bank-card" style="border:${isMe?`1.5px solid ${u.color}60`:"1px solid var(--border)"};background:${isMe?u.color+"06":"var(--card)"}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:10px">${av(u,36)}
+          <div>
+            <div style="font-weight:700;color:${u.color};font-size:15px">${u.name}</div>
+            <div style="color:var(--faint);font-size:10px">${total} Wetten${isMe?" · Ich":""}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700">€${u.bankroll}</div>
+          <div style="color:${pnl>=0?"var(--green)":"var(--red)"};font-size:11px;font-weight:600">${pnl>=0?"+":""}€${pnl} P&L</div>
+        </div>
+      </div>
+      <div class="bank-stats">
+        ${[{l:"Win Rate",v:total?Math.round(wins/total*100)+"%":"—"},{l:"Anteil",v:Math.round(u.bankroll/tb*100)+"%"},{l:"Wetten",v:total}].map(s=>`
+          <div class="bank-stat">
+            <div style="color:var(--faint);font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.05em">${s.l}</div>
+            <div style="color:var(--dim);font-weight:600;font-size:14px;margin-top:1px">${s.v}</div>
+          </div>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+  html+=`<div class="card card-pad">
+    <div style="color:var(--faint);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Kapitalverteilung</div>
+    <div style="height:12px;border-radius:6px;overflow:hidden;display:flex;gap:3px">
+      ${Object.values(USERS).map(u=>`<div title="${u.name}: €${u.bankroll}" style="flex:${u.bankroll};background:${u.color};opacity:.75"></div>`).join("")}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px">
+      ${Object.values(USERS).map(u=>`<div style="display:flex;align-items:center;gap:5px">
+        <div style="width:9px;height:9px;border-radius:3px;background:${u.color};opacity:.75"></div>
+        <span style="color:var(--dim);font-size:11px;font-weight:500">${u.name} €${u.bankroll}</span>
+      </div>`).join("")}
+    </div>
+  </div>`;
+  return html;
+}
+
+// ── ACCOUNTS ───────────────────────────────────────────────────────────────────
+function renderAccounts(){
+  const bd={
+    du: [{n:"Bet365",s:"good",last:"2h"},{n:"Unibet",s:"good",last:"1d"},{n:"Bwin",s:"warn",last:"3h"},{n:"Betano",s:"good",last:"5h"},{n:"Stake",s:"good",last:"2d"}],
+    flo:[{n:"Betano",s:"good",last:"5h"},{n:"Stake",s:"good",last:"2d"},{n:"Bet365",s:"good",last:"1d"},{n:"Unibet",s:"warn",last:"1h"},{n:"Bwin",s:"limited",last:"30m"}],
+    max:[{n:"Unibet",s:"good",last:"6h"},{n:"Bet365",s:"good",last:"3d"},{n:"Betano",s:"warn",last:"1h"},{n:"Bwin",s:"good",last:"2d"},{n:"Stake",s:"good",last:"4h"}],
+    jan:[{n:"Bwin",s:"good",last:"4h"},{n:"Stake",s:"good",last:"2h"},{n:"Bet365",s:"good",last:"1d"},{n:"Betano",s:"good",last:"6h"},{n:"Unibet",s:"good",last:"3h"}],
+  };
+  let html=`<div style="color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Account Health</div>`;
+  html+=Object.values(USERS).map(u=>{
+    const isMe=u.id===currentUser.id;
+    const bookies=bd[u.id]||[];
+    return`<div class="acc-card" style="${isMe?`border-color:${u.color}50`:""}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+        ${av(u,26)}<span style="color:${u.color};font-weight:600;font-size:14px">${u.name}</span>
+        ${isMe?`<span style="font-size:10px;background:${u.color}15;color:${u.color};padding:2px 7px;border-radius:4px;font-weight:600">Ich</span>`:""}
+      </div>
+      <div class="bh-grid">
+        ${bookies.map(b=>{
+          const sc=b.s==="good"?"var(--green)":b.s==="warn"?"var(--gold)":"var(--red)";
+          const bg=b.s==="good"?"var(--bg)":b.s==="warn"?"var(--goldbg)":"var(--redbg)";
+          return`<div class="bh-item" style="background:${bg};border:1px solid ${b.s==="good"?"var(--border)":sc+"40"}">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              ${bp(b.n)}<div style="width:7px;height:7px;border-radius:50%;background:${sc};align-self:center"></div>
+            </div>
+            <div style="color:var(--faint);font-size:10px;margin-bottom:2px">${b.last} ago</div>
+            <div style="font-size:10px;font-weight:700;color:${sc}">
+              ${b.s==="limited"?"🔴 Limitiert":b.s==="warn"?"⚠ Prüfen":"✓ OK"}
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  }).join("");
+  return html;
+}
+
+// ── SETTINGS ───────────────────────────────────────────────────────────────────
+function renderSettings(){
+  return`
+  <div style="color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">API Einstellungen</div>
+  <div class="card card-pad" style="border:2px solid var(--accent)30;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:5px">The Odds API</div>
+        <div style="color:var(--dim);font-size:11px;line-height:1.7">
+          Scannt alle aktivierten Bookies auf Arbs.<br>
+          Free Trial: 500 Requests · Danach ab $29/mo
+        </div>
+      </div>
+      <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;
+        background:${oddsApiKey?"var(--green)":"var(--border)"};
+        box-shadow:${oddsApiKey?"0 0 6px #2d6e3e80":"none"}"></div>
+    </div>
+    <div class="settings-input">
+      <input id="keyInput" placeholder="API Key eintragen…" value="${oddsApiKey}" onkeydown="if(event.key==='Enter')saveKey()"/>
+      <button class="btn-save" onclick="saveKey()">Speichern</button>
+      <a href="https://the-odds-api.com" target="_blank" style="background:var(--bg);border:1px solid var(--border);color:var(--faint);border-radius:7px;padding:0 12px;font-size:12px;text-decoration:none;display:flex;align-items:center">↗</a>
+    </div>
+    ${oddsApiKey?`<div style="margin-top:10px;color:var(--green);font-size:11px;font-weight:500">✓ Key aktiv — bereit zum Scannen</div>`:""}
+  </div>
+  <div style="background:var(--goldbg);border:1px solid var(--gold)40;border-radius:8px;padding:14px;margin-bottom:12px">
+    <div style="font-weight:700;font-size:13px;color:var(--gold);margin-bottom:8px">🔍 Debug-Modus</div>
+    <div style="color:var(--dim);font-size:11px;line-height:1.6;margin-bottom:10px">
+      Zeigt exakt was die API zurückgibt — Bookie-Namen, Mapping, Spiele.<br>
+      Nutze das wenn der Scan keine Arbs findet.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button onclick="runDebug()" style="background:var(--gold);border:none;color:#fff;
+        border-radius:7px;padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
+        ▶ Debug starten
+      </button>
+      <button onclick="document.getElementById('dbOut').innerHTML='Geleert.'"
+        style="background:none;border:1.5px solid var(--border2);color:var(--dim);
+        border-radius:7px;padding:9px 12px;font-size:12px;cursor:pointer;font-family:inherit">
+        Leeren
+      </button>
+    </div>
+    <div id="dbOut" style="font-size:10px;color:var(--faint);font-family:'Courier New',monospace;min-height:20px">
+      Noch kein Debug gestartet.
+    </div>
+  </div>
+  <div style="background:var(--bluebg);border:1px solid var(--blue)30;border-radius:8px;padding:14px">
+    <div style="color:var(--blue);font-weight:600;font-size:12px;margin-bottom:6px">ℹ So funktioniert der Scan</div>
+    <div style="color:var(--dim);font-size:11px;line-height:1.7">
+      1. Nur eure aktivierten Bookies &amp; Sports werden gescannt<br>
+      2. Pro Spiel: beste Odds über alle eure Bookies<br>
+      3. Arb = Summe aller inversen Odds &lt; 1<br>
+      4. Gefiltert nach euren Margin &amp; Odds-Einstellungen<br>
+      5. Bei Problemen: Debug → prüfen welche Bookies gemappt sind
+    </div>
+  </div>`;
+}
+function saveKey(){
+  const k=document.getElementById("keyInput").value.trim();
+  oddsApiKey=k; localStorage.setItem("odds-api-key",k);
+  addFeed("alert","API Key gespeichert ✓"); renderTab();
+}
+
+
+// ── BOOKIE NORMALIZE ──────────────────────────────────────────────────────────
+function normalizeBookie(apiKey, apiTitle){
+  const byKey=Object.keys(BOOKIE_API_KEYS).find(k=>BOOKIE_API_KEYS[k]===apiKey);
+  if(byKey&&F.bookies.includes(byKey)) return byKey;
+  const byTitle=F.bookies.find(b=>b.toLowerCase()===apiTitle.toLowerCase());
+  if(byTitle) return byTitle;
+  return null;
+}
+
+// ── DEBUG ──────────────────────────────────────────────────────────────────────
+async function runDebug(){
+  const el=document.getElementById("dbOut");
+  if(!el){alert("Setup Tab öffnen!"); return;}
+  if(!oddsApiKey){el.innerHTML="Kein API Key!"; return;}
+  const logs=[];
+  function log(msg,data){
+    logs.push({msg,data});
+    el.innerHTML=logs.map(e=>`<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+      <div style="font-weight:700;color:var(--accent);font-family:DM Sans,sans-serif">${e.msg}</div>
+      ${e.data?`<pre style="font-size:10px;color:var(--dim);white-space:pre-wrap;word-break:break-all;background:var(--bg2);padding:8px;border-radius:5px;max-height:180px;overflow:auto;margin-top:4px">${JSON.stringify(e.data,null,2)}</pre>`:""}
+    </div>`).join("");
+  }
+  try{
+    log("Schritt 1: Aktive Sports...");
+    const sRes=await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${oddsApiKey}`);
+    if(!sRes.ok){log("HTTP "+sRes.status+" Fehler — Key prüfen!");return;}
+    const allSports=await sRes.json();
+    const ourKeys=SCAN_SPORTS.map(s=>s.key);
+    const active=allSports.filter(s=>ourKeys.includes(s.key));
+    log("Aktive Sports ("+active.length+")",{aktiv:active.map(s=>s.key),inaktiv:ourKeys.filter(k=>!allSports.find(s=>s.key===k))});
+    if(!active.length){log("Keine aktiven Sports!");return;}
+
+    const sport=active[0];
+    log("Schritt 2: Odds für "+sport.key+"...");
+    const bKeys=F.bookies.map(b=>BOOKIE_API_KEYS[b]).filter(Boolean);
+    const bParam=bKeys.length?`&bookmakers=${bKeys.join(",")}`:`&regions=eu`;
+    const url=`https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${oddsApiKey}${bParam}&markets=h2h&oddsFormat=decimal`;
+    const r=await fetch(url);
+    const rem=r.headers.get("x-requests-remaining");
+    log("Response: "+r.status+" | Requests übrig: "+(rem||"?"));
+    if(!r.ok){log("Fehler "+r.status);return;}
+    const matches=await r.json();
+    // Only games starting within the selected time window
+const now24 = Date.now();
+const inWindow = now24 + (F.timeHours||72)*60*60*1000;
+const future=matches.filter(m=>{
+  const t = new Date(m.commence_time).getTime();
+  return t > now24 && t < inWindow;
+});
+    log(matches.length+" Spiele total, "+future.length+" in Zukunft");
+    if(!future.length){log("Alle Spiele schon vorbei!");return;}
+
+    const m=future[0];
+    const isThreeWay=!sport.twoWay&&THREE_WAY_SPORTS.has(sport.sport);
+    log("Erstes Spiel: "+m.home_team+" vs "+m.away_team,{
+      startet:new Date(m.commence_time).toLocaleString("de-DE"),
+      drei_weg:isThreeWay,
+      bookies:m.bookmakers?.map(bm=>({
+        api_key:bm.key,
+        api_title:bm.title,
+        gemappt_als:normalizeBookie(bm.key,bm.title)||"NICHT IN LISTE",
+        outcomes:bm.markets?.[0]?.outcomes?.map(o=>o.name+"="+o.price)||[]
+      }))
+    });
+
+    const seen={};
+    for(const match of future.slice(0,5))
+      for(const bm of (match.bookmakers||[]))
+        if(!seen[bm.key]) seen[bm.key]={api_key:bm.key,api_title:bm.title,gemappt:normalizeBookie(bm.key,bm.title)||"FEHLT"};
+    log("Alle Bookies (erste 5 Spiele)",Object.values(seen));
+
+    let found=0;
+    for(const match of future){
+      const best={};
+      for(const bm of (match.bookmakers||[])){
+        const dn=normalizeBookie(bm.key,bm.title);if(!dn)continue;
+        for(const mkt of (bm.markets||[])){
+          if(mkt.key!=="h2h")continue;
+          for(const o of mkt.outcomes){
+            if(!isThreeWay&&o.name==="Draw")continue;
+            if(o.price<F.minOdds||o.price>F.maxOdds)continue;
+            if(!best[o.name]||best[o.name].odds<o.price)best[o.name]={odds:o.price,bookie:dn,outcome:o.name};
+          }
+        }
+      }
+      const legs=Object.values(best);
+      if(!isThreeWay&&legs.length!==2)continue;
+      if(isThreeWay&&legs.length<2)continue;
+      if(legs.reduce((s,l)=>s+1/l.odds,0)<1)found++;
+    }
+    log("Arb-Simulation fertig",{arbs:found,filter:{bookies:F.bookies,margin:F.minMargin+"%",odds:F.minOdds+"-"+F.maxOdds}});
+    log(found>0?"✅ "+found+" Arbs — jetzt Scanner starten!":"Keine Arbs. Mehr Bookies aktivieren oder Margin auf 0.1% setzen.");
+  }catch(e){log("Fehler: "+e.message);}
+}
+
+// ── FEED ───────────────────────────────────────────────────────────────────────
+function addFeed(type,msg,uid){
+  feed.unshift({id:Date.now(),user:uid||currentUser?.id||"du",type,msg,ts:Date.now()});
+  if(feed.length>50) feed.pop();
+  renderFeed();
+}
+function renderFeed(){
+  const el=document.getElementById("feedList"); if(!el) return;
+  const icons={bet:"⚡",win:"🎉",alert:"🔔",msg:"💬"};
+  el.innerHTML=feed.map(item=>{
+    const u=USERS[item.user]||{name:item.user,color:"#888",avatar:"?"};
+    return`<div class="feed-item">${av(u,28)}
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;gap:4px">
+          <span style="color:${u.color};font-size:10px;font-weight:600;white-space:nowrap">${u.name}</span>
+          <span style="color:var(--faint);font-size:9px;flex-shrink:0">${timeAgo(item.ts)}</span>
+        </div>
+        <div style="color:var(--dim);font-size:12px;margin-top:2px;line-height:1.4;word-break:break-word">
+          ${icons[item.type]||"·"} ${item.msg}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function toggleFeed(){
+  const el=document.getElementById("feed-overlay");
+  const show=el.style.display==="none";
+  el.style.display=show?"flex":"none";
+  if(show){el.style.flexDirection="column";renderFeed();}
+}
+function sendChat(){
+  const input=document.getElementById("chatInput");
+  const msg=input.value.trim(); if(!msg) return;
+  addFeed("msg",msg); input.value="";
+}
+</script>
+</body>
+</html>
